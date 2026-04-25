@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Speak With Power</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1410;
+    --paper: #f5f0e8;
+    --cream: #ede7d4;
+    --amber: #c8800a;
+    --amber-light: #e8a020;
+    --rust: #9b3a1a;
+    --sage: #4a6741;
+    --muted: #7a7060;
+    --card-bg: #faf7f0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background-color: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grain texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.4;
+  }
+
+  header {
+    padding: 3rem 2rem 2rem;
+    max-width: 860px;
+    margin: 0 auto;
+    border-bottom: 1px solid var(--cream);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .header-title h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .header-title h1 em {
+    font-style: italic;
+    color: var(--amber);
+  }
+
+  .header-title p {
+    margin-top: 0.5rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .progress-ring {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .progress-ring svg { transform: rotate(-90deg); }
+  .progress-ring-track { stroke: var(--cream); fill: none; }
+  .progress-ring-fill {
+    fill: none;
+    stroke: var(--amber);
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.6s ease;
+  }
+
+  .progress-ring span {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  nav {
+    display: flex;
+    gap: 0;
+    padding: 0 2rem;
+    max-width: 860px;
+    margin: 0 auto;
+    border-bottom: 1px solid var(--cream);
+    overflow-x: auto;
+  }
+
+  nav button {
+    background: none;
+    border: none;
+    padding: 1rem 1.2rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  nav button.active {
+    color: var(--ink);
+    border-bottom-color: var(--amber);
+  }
+
+  nav button:hover:not(.active) { color: var(--ink); }
+
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 4rem;
+  }
+
+  .tab-panel { display: none; animation: fadeIn 0.3s ease; }
+  .tab-panel.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── PILLARS TAB ── */
+  .section-intro {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-style: italic;
+    color: var(--muted);
+    margin-bottom: 2rem;
+    line-height: 1.5;
+  }
+
+  .pillars-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.2rem;
+  }
+
+  .pillar-card {
+    background: var(--card-bg);
+    border: 1px solid var(--cream);
+    border-radius: 4px;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pillar-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 0;
+    background: var(--amber);
+    transition: height 0.25s ease;
+  }
+
+  .pillar-card:hover, .pillar-card.done {
+    border-color: var(--amber-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(200,128,10,0.12);
+  }
+
+  .pillar-card:hover::before, .pillar-card.done::before { height: 100%; }
+
+  .pillar-card.done { background: #fdf8ec; }
+
+  .pillar-icon {
+    font-size: 1.6rem;
+    margin-bottom: 0.8rem;
+    display: block;
+  }
+
+  .pillar-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+  }
+
+  .pillar-card p {
+    font-size: 0.83rem;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  .pillar-card .done-badge {
+    position: absolute;
+    top: 1rem; right: 1rem;
+    font-size: 0.65rem;
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--amber);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .pillar-card.done .done-badge { opacity: 1; }
+
+  /* ── CHECKLIST TAB ── */
+  .checklist-section { margin-bottom: 2.5rem; }
+
+  .checklist-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .checklist-section h2 span {
+    font-size: 0.7rem;
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+    font-weight: 400;
+    font-style: normal;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--cream);
+    cursor: pointer;
+    transition: background 0.15s;
+    border-radius: 2px;
+    padding-left: 0.3rem;
+  }
+
+  .check-item:hover { background: rgba(200,128,10,0.04); }
+  .check-item:last-child { border-bottom: none; }
+
+  .check-box {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    border: 1.5px solid var(--muted);
+    border-radius: 2px;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, border-color 0.2s;
+    font-size: 0.65rem;
+    color: white;
+  }
+
+  .check-item.checked .check-box {
+    background: var(--amber);
+    border-color: var(--amber);
+  }
+
+  .check-item.checked .check-text { text-decoration: line-through; color: var(--muted); }
+
+  .check-text {
+    font-size: 0.88rem;
+    line-height: 1.5;
+    transition: color 0.2s;
+  }
+
+  .check-label {
+    font-size: 0.68rem;
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--amber);
+    margin-top: 0.15rem;
+    display: block;
+  }
+
+  /* ── PRACTICE TAB ── */
+  .prompt-box {
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 4px;
+    padding: 2.5rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .prompt-box .prompt-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--amber);
+    margin-bottom: 1rem;
+  }
+
+  .prompt-box .prompt-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem;
+    font-style: italic;
+    line-height: 1.5;
+    flex: 1;
+  }
+
+  .prompt-meta {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .prompt-meta span {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    color: #9a917f;
+    text-transform: uppercase;
+  }
+
+  .prompt-meta strong { color: var(--amber-light); }
+
+  .btn-row {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+
+  .btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.7rem 1.4rem;
+    border-radius: 2px;
+    border: 1.5px solid;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, transform 0.1s;
+  }
+
+  .btn:active { transform: scale(0.97); }
+
+  .btn-primary {
+    background: var(--amber);
+    border-color: var(--amber);
+    color: white;
+  }
+
+  .btn-primary:hover { background: var(--amber-light); border-color: var(--amber-light); }
+
+  .btn-outline {
+    background: transparent;
+    border-color: var(--cream);
+    color: var(--ink);
+  }
+
+  .btn-outline:hover { border-color: var(--amber); color: var(--amber); }
+
+  .btn-ai {
+    background: linear-gradient(135deg, var(--rust), var(--amber));
+    border-color: var(--rust);
+    color: white;
+    position: relative;
+  }
+  .btn-ai:hover { filter: brightness(1.1); }
+
+  .btn-news {
+    background: var(--sage);
+    border-color: var(--sage);
+    color: white;
+  }
+  .btn-news:hover { background: #3d5636; border-color: #3d5636; }
+
+  /* News result panel */
+  .news-result {
+    display: none;
+    background: var(--card-bg);
+    border: 1px solid var(--cream);
+    border-left: 4px solid var(--sage);
+    border-radius: 4px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    animation: fadeIn 0.4s ease;
+  }
+  .news-result.show { display: block; }
+
+  .news-result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .news-result-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--sage);
+    font-weight: 500;
+  }
+
+  .news-result-close {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0 0.4rem;
+    line-height: 1;
+  }
+  .news-result-close:hover { color: var(--ink); }
+
+  .news-headline {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    line-height: 1.25;
+    margin-bottom: 0.4rem;
+    font-weight: 700;
+  }
+
+  .news-source {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .news-section { margin-bottom: 1.5rem; }
+
+  .news-section h4 {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--amber);
+    margin-bottom: 0.7rem;
+    font-weight: 500;
+  }
+
+  .news-section-hint {
+    color: var(--muted);
+    text-transform: none;
+    letter-spacing: 0;
+    font-style: italic;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.78rem;
+  }
+
+  .news-section ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .news-section li {
+    position: relative;
+    padding: 0.4rem 0 0.4rem 1.4rem;
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+
+  .news-section li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--amber);
+    font-weight: bold;
+  }
+
+  .news-prompt-box {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 1.2rem 1.4rem;
+    border-radius: 3px;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    line-height: 1.5;
+  }
+
+  .news-script {
+    background: var(--paper);
+    border: 1px dashed var(--cream);
+    padding: 1.5rem;
+    border-radius: 3px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.97rem;
+    line-height: 1.75;
+    white-space: pre-wrap;
+  }
+
+  .news-script .pause {
+    color: var(--amber);
+    font-weight: 700;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85em;
+  }
+
+  .news-script strong {
+    background: linear-gradient(transparent 60%, rgba(200,128,10,0.25) 60%);
+    padding: 0 2px;
+  }
+
+  .news-actions {
+    display: flex;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+  }
+
+  .news-sources-section { display: none; }
+  .news-sources-section.show { display: block; }
+
+  .news-sources-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .news-sources-list li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--cream);
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .news-sources-list li::before { content: none; }
+  .news-sources-list li:last-child { border-bottom: none; }
+
+  .news-sources-list a {
+    color: var(--rust);
+    text-decoration: none;
+    font-weight: 500;
+    word-break: break-word;
+  }
+  .news-sources-list a:hover {
+    color: var(--amber);
+    text-decoration: underline;
+  }
+
+  .news-sources-list .source-domain {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0.2rem;
+  }
+
+  .source-badge {
+    display: inline-block;
+    padding: 0.1rem 0.45rem;
+    border-radius: 10px;
+    font-size: 0.62rem;
+    margin-left: 0.4rem;
+    text-transform: none;
+    letter-spacing: 0.02em;
+    font-weight: 500;
+  }
+  .source-badge.trusted {
+    background: rgba(74, 103, 65, 0.15);
+    color: var(--sage);
+  }
+  .source-badge.untrusted {
+    background: rgba(155, 58, 26, 0.12);
+    color: var(--rust);
+  }
+
+  /* AI modal */
+  .ai-modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 20, 16, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    animation: fadeIn 0.2s ease;
+  }
+  .ai-modal-backdrop.open { display: flex; }
+
+  .ai-modal {
+    background: var(--paper);
+    border-radius: 6px;
+    padding: 2rem;
+    max-width: 460px;
+    width: 100%;
+    position: relative;
+    border: 1px solid var(--cream);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: modalSlide 0.3s ease;
+  }
+
+  @keyframes modalSlide {
+    from { opacity: 0; transform: translateY(20px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .ai-modal h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .ai-modal-sub {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+  }
+
+  .ai-modal-close {
+    position: absolute;
+    top: 0.8rem; right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.6rem;
+    color: var(--muted);
+    cursor: pointer;
+    line-height: 1;
+    padding: 0.3rem 0.6rem;
+  }
+  .ai-modal-close:hover { color: var(--ink); }
+
+  .ai-field-label {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin: 1rem 0 0.5rem;
+  }
+
+  .ai-input {
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--cream);
+    background: var(--card-bg);
+    border-radius: 3px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--ink);
+    transition: border-color 0.15s;
+  }
+  .ai-input:focus { outline: none; border-color: var(--amber); }
+
+  .ai-pill-row {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+
+  .ai-pill {
+    background: transparent;
+    border: 1px solid var(--cream);
+    padding: 0.45rem 0.9rem;
+    border-radius: 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .ai-pill:hover { border-color: var(--amber); color: var(--amber); }
+  .ai-pill.active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+
+  .ai-generate-btn {
+    width: 100%;
+    margin-top: 1.5rem;
+    padding: 0.9rem;
+  }
+
+  .ai-generate-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .ai-status {
+    margin-top: 0.8rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-align: center;
+    min-height: 1rem;
+  }
+
+  .ai-status.error { color: var(--rust); }
+
+  .tips-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .tip-card {
+    background: var(--card-bg);
+    border: 1px solid var(--cream);
+    border-radius: 4px;
+    padding: 1.2rem;
+  }
+
+  .tip-card .tip-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--amber);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  .tip-card p { font-size: 0.83rem; line-height: 1.55; color: var(--ink); }
+
+  /* ── HABITS TAB ── */
+  .habit-tracker { margin-bottom: 2.5rem; }
+
+  .habit-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--cream);
+    flex-wrap: wrap;
+  }
+
+  .habit-name {
+    flex: 1;
+    min-width: 160px;
+  }
+
+  .habit-name strong {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0.15rem;
+  }
+
+  .habit-name span {
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  .habit-days {
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  .day-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid var(--cream);
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+
+  .day-dot:hover { border-color: var(--amber); color: var(--amber); }
+  .day-dot.lit { background: var(--amber); border-color: var(--amber); color: white; }
+
+  .streak-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .streak-badge strong { color: var(--amber); font-size: 0.9rem; }
+
+  /* ── Responsive ── */
+  @media (max-width: 520px) {
+    header { padding: 2rem 1.2rem 1.5rem; }
+    main { padding: 1.5rem 1.2rem 3rem; }
+    nav { padding: 0 1.2rem; }
+    .prompt-box { padding: 1.5rem; }
+    .day-dot { width: 24px; height: 24px; font-size: 0.55rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">
+    <h1>Speak <em>With</em> Power</h1>
+    <p>Your personal presenting &amp; speaking coach</p>
+  </div>
+  <div class="progress-ring" id="progressRing">
+    <svg width="58" height="58" viewBox="0 0 58 58">
+      <circle class="progress-ring-track" cx="29" cy="29" r="23" stroke-width="4"/>
+      <circle class="progress-ring-fill" id="ringFill" cx="29" cy="29" r="23" stroke-width="4"
+        stroke-dasharray="144.5" stroke-dashoffset="144.5"/>
+    </svg>
+    <span id="progressLabel">0% done</span>
+  </div>
+</header>
+
+<nav>
+  <button class="active" onclick="switchTab('pillars', this)">The 5 Pillars</button>
+  <button onclick="switchTab('checklist', this)">Pre-Talk Checklist</button>
+  <button onclick="switchTab('practice', this)">Practice Prompts</button>
+  <button onclick="switchTab('habits', this)">Daily Habits</button>
+</nav>
+
+<main>
+
+  <!-- PILLARS -->
+  <div class="tab-panel active" id="tab-pillars">
+    <p class="section-intro">Great speakers aren't born — they're built. Master these five pillars, one at a time.</p>
+    <div class="pillars-grid" id="pillarsGrid">
+
+      <div class="pillar-card" onclick="togglePillar(this)">
+        <span class="done-badge">✓ Done</span>
+        <span class="pillar-icon">🎯</span>
+        <h3>Clarity of Message</h3>
+        <p>Know your one key idea. If you can't say it in one sentence, you haven't found it yet. Every word should serve that idea.</p>
+      </div>
+
+      <div class="pillar-card" onclick="togglePillar(this)">
+        <span class="done-badge">✓ Done</span>
+        <span class="pillar-icon">🎙️</span>
+        <h3>Voice & Delivery</h3>
+        <p>Pace, pause, and pitch. Slow down more than feels natural. Silence is not dead air — it's emphasis. Vary your tone so you're never monotonous.</p>
+      </div>
+
+      <div class="pillar-card" onclick="togglePillar(this)">
+        <span class="done-badge">✓ Done</span>
+        <span class="pillar-icon">👁️</span>
+        <h3>Presence & Body Language</h3>
+        <p>Stand tall, occupy space, and make deliberate eye contact. Your body communicates before you speak a single word.</p>
+      </div>
+
+      <div class="pillar-card" onclick="togglePillar(this)">
+        <span class="done-badge">✓ Done</span>
+        <span class="pillar-icon">📖</span>
+        <h3>Story & Structure</h3>
+        <p>People remember stories, not statistics. Open with a hook, build tension, resolve it. Give your talk a narrative arc — not just bullet points.</p>
+      </div>
+
+      <div class="pillar-card" onclick="togglePillar(this)">
+        <span class="done-badge">✓ Done</span>
+        <span class="pillar-icon">🔗</span>
+        <h3>Audience Connection</h3>
+        <p>Speaking at people is a monologue. Speaking with people is connection. Read the room, invite participation, and make it feel personal.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CHECKLIST -->
+  <div class="tab-panel" id="tab-checklist">
+
+    <div class="checklist-section">
+      <h2>Before You Prepare <span>— Days ahead</span></h2>
+      <div id="cl-before"></div>
+    </div>
+
+    <div class="checklist-section">
+      <h2>During Preparation <span>— Hours ahead</span></h2>
+      <div id="cl-prep"></div>
+    </div>
+
+    <div class="checklist-section">
+      <h2>Right Before You Speak <span>— Minutes ahead</span></h2>
+      <div id="cl-right"></div>
+    </div>
+
+  </div>
+
+  <!-- PRACTICE -->
+  <div class="tab-panel" id="tab-practice">
+    <div class="prompt-box" id="promptBox">
+      <div class="prompt-label">Today's Practice Prompt</div>
+      <div class="prompt-text" id="promptText">Loading your prompt…</div>
+      <div class="prompt-meta">
+        <span>⏱ Duration: <strong id="promptDuration">—</strong></span>
+        <span>🎯 Focus: <strong id="promptFocus">—</strong></span>
+        <span>💪 Level: <strong id="promptLevel">—</strong></span>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="newPrompt()">New Prompt</button>
+      <button class="btn btn-outline" onclick="markPromptDone()">Mark as Practiced ✓</button>
+      <button class="btn btn-ai" onclick="openAIModal()">✨ Generate Custom Prompt</button>
+      <button class="btn btn-news" onclick="openNewsModal()">📰 News-Based Script</button>
+    </div>
+
+    <!-- News-based script result panel -->
+    <div class="news-result" id="newsResult">
+      <div class="news-result-header">
+        <span class="news-result-tag">📰 News-Based Practice</span>
+        <button class="news-result-close" onclick="closeNewsResult()" aria-label="Dismiss">×</button>
+      </div>
+      <h3 class="news-headline" id="newsHeadline"></h3>
+      <p class="news-source" id="newsSource"></p>
+
+      <div class="news-section">
+        <h4>Key Points</h4>
+        <ul id="newsBullets"></ul>
+      </div>
+
+      <div class="news-section">
+        <h4>Your Practice Prompt</h4>
+        <div class="news-prompt-box" id="newsPromptText"></div>
+      </div>
+
+      <div class="news-section">
+        <h4>Example Script <span class="news-section-hint">— read it aloud, then try without</span></h4>
+        <div class="news-script" id="newsScript"></div>
+      </div>
+
+      <div class="news-section news-sources-section" id="newsSourcesSection">
+        <h4>Sources <span class="news-section-hint">— verify the story</span></h4>
+        <ul class="news-sources-list" id="newsSources"></ul>
+      </div>
+
+      <div class="news-actions">
+        <button class="btn btn-outline" onclick="generateNewsScript(lastNewsTopic)">↻ Different Angle</button>
+        <button class="btn btn-primary" onclick="closeNewsResult()">Done</button>
+      </div>
+    </div>
+
+    <!-- AI custom prompt modal -->
+    <div class="ai-modal-backdrop" id="aiModal" onclick="closeAIModalIfBackdrop(event)">
+      <div class="ai-modal">
+        <button class="ai-modal-close" onclick="closeAIModal()" aria-label="Close">×</button>
+        <h3>✨ Tailor a Prompt for You</h3>
+        <p class="ai-modal-sub">Tell me what you want to practice — be as specific or vague as you like.</p>
+
+        <label class="ai-field-label">What's the focus?</label>
+        <input id="aiTopic" type="text" class="ai-input" placeholder="e.g. wedding toast, job interview answer, storytelling…">
+
+        <label class="ai-field-label">Difficulty</label>
+        <div class="ai-pill-row" id="aiLevelRow">
+          <button class="ai-pill active" data-level="Beginner">Beginner</button>
+          <button class="ai-pill" data-level="Intermediate">Intermediate</button>
+          <button class="ai-pill" data-level="Advanced">Advanced</button>
+        </div>
+
+        <label class="ai-field-label">Length</label>
+        <div class="ai-pill-row" id="aiDurationRow">
+          <button class="ai-pill" data-duration="30 sec">30 sec</button>
+          <button class="ai-pill active" data-duration="1 min">1 min</button>
+          <button class="ai-pill" data-duration="2 min">2 min</button>
+          <button class="ai-pill" data-duration="3 min">3 min</button>
+        </div>
+
+        <button class="btn btn-primary ai-generate-btn" onclick="generatePrompt()" id="aiGenerateBtn">Generate</button>
+        <div class="ai-status" id="aiStatus"></div>
+      </div>
+    </div>
+
+    <!-- News topic modal -->
+    <div class="ai-modal-backdrop" id="newsModal" onclick="closeNewsModalIfBackdrop(event)">
+      <div class="ai-modal">
+        <button class="ai-modal-close" onclick="closeNewsModal()" aria-label="Close">×</button>
+        <h3>📰 News-Based Practice</h3>
+        <p class="ai-modal-sub">Pick a topic area. I'll find a recent story, summarize it, and write you a script to practice with.</p>
+
+        <label class="ai-field-label">Topic area</label>
+        <div class="ai-pill-row news-topics" id="newsTopicRow">
+          <button class="ai-pill active" data-topic="US health insurance">Health insurance</button>
+          <button class="ai-pill" data-topic="health actuary work and trends">Actuarial work</button>
+          <button class="ai-pill" data-topic="AI in healthcare and insurance">AI &amp; insurtech</button>
+          <button class="ai-pill" data-topic="ACA marketplace and premium changes">ACA / premiums</button>
+          <button class="ai-pill" data-topic="Medicare and Medicaid policy">Medicare/Medicaid</button>
+          <button class="ai-pill" data-topic="prescription drug costs and PBMs">Drug costs / PBMs</button>
+        </div>
+
+        <label class="ai-field-label">Or type something specific</label>
+        <input id="newsCustomTopic" type="text" class="ai-input" placeholder="e.g. risk adjustment, GLP-1 coverage, claim denials…">
+
+        <label class="ai-field-label">Audience</label>
+        <div class="ai-pill-row" id="newsAudienceRow">
+          <button class="ai-pill active" data-audience="general public with no insurance background">General public</button>
+          <button class="ai-pill" data-audience="industry professionals at a conference">Industry pros</button>
+          <button class="ai-pill" data-audience="executives in a board meeting">Executives</button>
+          <button class="ai-pill" data-audience="a job interview panel">Interview panel</button>
+        </div>
+
+        <button class="btn btn-primary ai-generate-btn" onclick="fetchNewsScript()" id="newsGenerateBtn">Find Story &amp; Generate Script</button>
+        <div class="ai-status" id="newsStatus"></div>
+      </div>
+    </div>
+
+    <div class="tips-row" id="tipsRow"></div>
+  </div>
+
+  <!-- HABITS -->
+  <div class="tab-panel" id="tab-habits">
+    <p class="section-intro" style="font-size:1.1rem; margin-bottom:2rem;">Small daily reps compound into remarkable skill. Track your practice this week.</p>
+    <div class="habit-tracker" id="habitTracker"></div>
+    <p style="font-size:0.78rem; color:var(--muted); font-family:'DM Mono',monospace; text-transform:uppercase; letter-spacing:0.06em; margin-top:1rem;">
+      Tap a day to mark it complete. Keep the streak alive.
+    </p>
+  </div>
+
+</main>
+
+<script>
+// ── Tab switching ──
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── Pillars ──
+let pillarsDone = 0;
+function togglePillar(card) {
+  card.classList.toggle('done');
+  pillarsDone = document.querySelectorAll('.pillar-card.done').length;
+  updateProgress();
+}
+
+// ── Checklist ──
+const checklistData = {
+  before: [
+    { text: 'Define the single most important takeaway for your audience', label: 'Message clarity' },
+    { text: 'Know your audience — their background, expectations, and what keeps them up at night', label: 'Audience research' },
+    { text: 'Outline your talk: Hook → Context → 3 key points → Story → Call to action', label: 'Structure' },
+    { text: 'Record yourself once on your phone — watch it back without judgment', label: 'Self-review' },
+  ],
+  prep: [
+    { text: 'Rehearse out loud (not just in your head) at least 3 times', label: 'Out-loud practice' },
+    { text: 'Time yourself — trim anything that runs over', label: 'Pacing' },
+    { text: 'Prepare a strong opening line you can say from memory', label: 'Opening hook' },
+    { text: 'Anticipate the 2–3 hardest questions and prepare short answers', label: 'Q&A prep' },
+    { text: "Identify 2 moments where you'll deliberately pause for emphasis", label: 'Pause placement' },
+  ],
+  right: [
+    { text: 'Take 5 slow, deep breaths — exhale longer than you inhale', label: 'Calm nerves' },
+    { text: 'Do a 2-minute power pose (or any expansive posture) in private', label: 'Body language' },
+    { text: "Arrive early — walk the space, check tech, and stand where you'll present", label: 'Space familiarity' },
+    { text: 'Remind yourself: the audience wants you to succeed', label: 'Mindset' },
+    { text: 'Put your phone on silent and out of reach', label: 'Focus' },
+  ],
+};
+
+let checkedItems = {};
+
+function renderChecklist() {
+  const sections = { before: 'cl-before', prep: 'cl-prep', right: 'cl-right' };
+  for (const [key, containerId] of Object.entries(sections)) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    checklistData[key].forEach((item, i) => {
+      const id = key + '-' + i;
+      const isChecked = checkedItems[id];
+      const div = document.createElement('div');
+      div.className = 'check-item' + (isChecked ? ' checked' : '');
+      div.innerHTML = `
+        <div class="check-box">${isChecked ? '✓' : ''}</div>
+        <div>
+          <span class="check-label">${item.label}</span>
+          <span class="check-text">${item.text}</span>
+        </div>`;
+      div.onclick = () => {
+        checkedItems[id] = !checkedItems[id];
+        renderChecklist();
+        updateProgress();
+      };
+      container.appendChild(div);
+    });
+  }
+}
+
+function getChecklistCount() {
+  return Object.values(checkedItems).filter(Boolean).length;
+}
+
+// ── Practice prompts ──
+const prompts = [
+  // BEGINNER
+  { text: 'Introduce yourself in exactly 60 seconds. Include who you are, what you care about, and one surprising fact about yourself.', duration: '1 min', focus: 'Clarity & pacing', level: 'Beginner' },
+  { text: 'Explain a complex topic from your life or work as if the audience is 10 years old. No jargon allowed.', duration: '2 min', focus: 'Simplification', level: 'Beginner' },
+  { text: 'Speak for 60 seconds with zero filler words (um, uh, like, you know). If you catch yourself, start over.', duration: '1 min', focus: 'Filler word elimination', level: 'Beginner' },
+  { text: 'Describe your favorite meal in vivid sensory detail — what you see, smell, taste, and feel. Make the listener hungry.', duration: '90 sec', focus: 'Sensory description', level: 'Beginner' },
+  { text: 'Tell us about your morning routine. Try to make it interesting through specific details and pacing.', duration: '90 sec', focus: 'Engaging the mundane', level: 'Beginner' },
+  { text: 'Read a paragraph from any book aloud. Pause deliberately at every comma and period. Notice how it changes the rhythm.', duration: '2 min', focus: 'Pausing & rhythm', level: 'Beginner' },
+  { text: 'Recite the alphabet, but vary your tone, pitch, and pace dramatically with every letter. Stretch your vocal range.', duration: '30 sec', focus: 'Vocal variety', level: 'Beginner' },
+  { text: 'Describe a place you love so vividly that the listener could draw it. Include 5+ specific concrete details.', duration: '2 min', focus: 'Concrete detail', level: 'Beginner' },
+  { text: 'Practice your "elevator answer" to: "So, what do you do?" Make it memorable in under 30 seconds.', duration: '30 sec', focus: 'Self-introduction', level: 'Beginner' },
+  { text: 'Speak slowly. Cut your normal speaking pace in half for 60 seconds on any topic. Notice how it feels.', duration: '1 min', focus: 'Pacing control', level: 'Beginner' },
+
+  // INTERMEDIATE
+  { text: 'Tell a story about a time you failed, what you learned, and how it changed you. Make eye contact with an imaginary audience.', duration: '3 min', focus: 'Storytelling', level: 'Intermediate' },
+  { text: 'Give a 90-second "toast" — celebrate someone (real or fictional) using vivid, specific details rather than generic praise.', duration: '90 sec', focus: 'Specificity & warmth', level: 'Intermediate' },
+  { text: "Pick an everyday object nearby. Explain why it's the most important invention in human history — you have 2 minutes.", duration: '2 min', focus: 'Improvisation', level: 'Intermediate' },
+  { text: 'Tell the story of the best day of your life — but in only 90 seconds. Choose your details ruthlessly.', duration: '90 sec', focus: 'Editing & focus', level: 'Intermediate' },
+  { text: 'Give a 2-minute "how-to" on a skill you have. Start with why it matters, then teach the steps.', duration: '2 min', focus: 'Teaching structure', level: 'Intermediate' },
+  { text: 'Describe a strong opinion you hold, then steelman the opposing view as fairly as you can.', duration: '3 min', focus: 'Balanced thinking', level: 'Intermediate' },
+  { text: 'Tell a story using the structure: setup → conflict → turning point → resolution. Time yourself at 2 minutes.', duration: '2 min', focus: 'Narrative arc', level: 'Intermediate' },
+  { text: 'Give a 60-second "TED talk" on something you care deeply about. Open with a hook that grabs attention.', duration: '1 min', focus: 'Compelling openings', level: 'Intermediate' },
+  { text: 'Explain a recent news event to someone who hasn\'t heard about it. Be clear, neutral, and concise.', duration: '90 sec', focus: 'Clear summarization', level: 'Intermediate' },
+  { text: 'Talk for 2 minutes about a topic you know well — but use only short sentences. Notice the impact.', duration: '2 min', focus: 'Sentence economy', level: 'Intermediate' },
+  { text: 'Describe a person who changed your life. Help us see them through specific moments, not abstract praise.', duration: '2 min', focus: 'Character & emotion', level: 'Intermediate' },
+  { text: 'Give a 90-second update on a project you\'re working on. Open with the headline result, not the backstory.', duration: '90 sec', focus: 'Lead with the point', level: 'Intermediate' },
+
+  // ADVANCED
+  { text: 'Deliver a 2-minute argument for a position you personally disagree with. Make it convincing.', duration: '2 min', focus: 'Conviction & persuasion', level: 'Advanced' },
+  { text: 'Open a talk on any topic with a question, a statistic, and a short story — all within the first 45 seconds.', duration: '45 sec', focus: 'Opening hooks', level: 'Advanced' },
+  { text: 'Improvise a 3-minute talk on a topic given to you by someone else right before you start. No prep.', duration: '3 min', focus: 'Pure improvisation', level: 'Advanced' },
+  { text: 'Tell the same story two ways: first to inspire, then to warn. Same facts — different framing and tone.', duration: '4 min', focus: 'Tonal control', level: 'Advanced' },
+  { text: 'Give a closing speech that ends with a single, powerful sentence. Spend 90 seconds building to it.', duration: '90 sec', focus: 'Building to a payoff', level: 'Advanced' },
+  { text: 'Practice handling a hostile question. Have someone challenge you, then respond with grace and substance.', duration: '2 min', focus: 'Q&A under pressure', level: 'Advanced' },
+  { text: 'Speak for 2 minutes using strategic silence — pause for at least 3 full seconds, three separate times.', duration: '2 min', focus: 'Power of silence', level: 'Advanced' },
+  { text: 'Deliver bad news to a room of people who don\'t want to hear it. Be honest, direct, and human.', duration: '2 min', focus: 'Hard conversations', level: 'Advanced' },
+];
+
+let currentPromptIndex = 0;
+
+function newPrompt() {
+  let next;
+  do { next = Math.floor(Math.random() * prompts.length); } while (next === currentPromptIndex);
+  currentPromptIndex = next;
+  showPrompt();
+}
+
+function showPrompt() {
+  const p = prompts[currentPromptIndex];
+  document.getElementById('promptText').textContent = p.text;
+  document.getElementById('promptDuration').textContent = p.duration;
+  document.getElementById('promptFocus').textContent = p.focus;
+  document.getElementById('promptLevel').textContent = p.level;
+}
+
+function markPromptDone() {
+  const btn = document.querySelector('[onclick="markPromptDone()"]');
+  btn.textContent = '✓ Practiced!';
+  btn.style.borderColor = 'var(--sage)';
+  btn.style.color = 'var(--sage)';
+  setTimeout(() => {
+    btn.textContent = 'Mark as Practiced ✓';
+    btn.style.borderColor = '';
+    btn.style.color = '';
+    newPrompt();
+  }, 2000);
+}
+
+// ── AI custom prompt ──
+let selectedLevel = 'Beginner';
+let selectedDuration = '1 min';
+
+function openAIModal() {
+  document.getElementById('aiModal').classList.add('open');
+  document.getElementById('aiStatus').textContent = '';
+  document.getElementById('aiStatus').classList.remove('error');
+}
+
+function closeAIModal() {
+  document.getElementById('aiModal').classList.remove('open');
+}
+
+function closeAIModalIfBackdrop(e) {
+  if (e.target.id === 'aiModal') closeAIModal();
+}
+
+// Pill selection
+document.getElementById('aiLevelRow').addEventListener('click', (e) => {
+  if (e.target.classList.contains('ai-pill')) {
+    document.querySelectorAll('#aiLevelRow .ai-pill').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    selectedLevel = e.target.dataset.level;
+  }
+});
+
+document.getElementById('aiDurationRow').addEventListener('click', (e) => {
+  if (e.target.classList.contains('ai-pill')) {
+    document.querySelectorAll('#aiDurationRow .ai-pill').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    selectedDuration = e.target.dataset.duration;
+  }
+});
+
+async function generatePrompt() {
+  const topicEl = document.getElementById('aiTopic');
+  const btn = document.getElementById('aiGenerateBtn');
+  const status = document.getElementById('aiStatus');
+  const topic = topicEl.value.trim();
+
+  btn.disabled = true;
+  btn.textContent = 'Generating…';
+  status.textContent = 'Crafting a tailored prompt for you…';
+  status.classList.remove('error');
+
+  const userPrompt = `Generate ONE speaking-and-presenting practice exercise as a JSON object with no other text.
+
+Constraints:
+- Difficulty level: ${selectedLevel}
+- Target duration: ${selectedDuration}
+- Topic / focus area${topic ? ': ' + topic : ' (any — choose something useful)'}
+
+Return ONLY valid JSON in this exact shape, no markdown fences, no preamble:
+{
+  "text": "A clear, actionable speaking exercise prompt of 1-3 sentences. Should give a specific scenario or constraint, not just a topic.",
+  "duration": "${selectedDuration}",
+  "focus": "A 2-4 word skill being practiced (e.g. Storytelling, Vocal variety, Persuasion)",
+  "level": "${selectedLevel}"
+}
+
+The "text" must be a concrete exercise the speaker can attempt right now alone, not advice or an explanation.`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 500,
+        messages: [{ role: 'user', content: userPrompt }],
+      }),
+    });
+
+    if (!response.ok) throw new Error('API request failed: ' + response.status);
+
+    const data = await response.json();
+    const textBlock = data.content.find(b => b.type === 'text');
+    if (!textBlock) throw new Error('No text response from API');
+
+    const cleaned = textBlock.text.replace(/```json|```/g, '').trim();
+    const newPrompt = JSON.parse(cleaned);
+
+    if (!newPrompt.text) throw new Error('Invalid prompt format');
+
+    // Inject into the prompt list and display it
+    prompts.push(newPrompt);
+    currentPromptIndex = prompts.length - 1;
+    showPrompt();
+    closeAIModal();
+
+    // Subtle highlight to show it's a custom one
+    const box = document.getElementById('promptBox');
+    box.style.boxShadow = '0 0 0 2px var(--amber)';
+    setTimeout(() => { box.style.boxShadow = ''; }, 1500);
+
+  } catch (err) {
+    console.error(err);
+    status.textContent = '⚠ Couldn\'t generate. Try again or check your connection.';
+    status.classList.add('error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Generate';
+  }
+}
+
+// Close modal on Escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeAIModal();
+    closeNewsModal();
+  }
+});
+
+// ── News-based script generator ──
+let selectedNewsTopic = 'US health insurance';
+let selectedNewsAudience = 'general public with no insurance background';
+let lastNewsTopic = null;
+
+function openNewsModal() {
+  document.getElementById('newsModal').classList.add('open');
+  document.getElementById('newsStatus').textContent = '';
+  document.getElementById('newsStatus').classList.remove('error');
+}
+
+function closeNewsModal() {
+  document.getElementById('newsModal').classList.remove('open');
+}
+
+function closeNewsModalIfBackdrop(e) {
+  if (e.target.id === 'newsModal') closeNewsModal();
+}
+
+document.getElementById('newsTopicRow').addEventListener('click', (e) => {
+  if (e.target.classList.contains('ai-pill')) {
+    document.querySelectorAll('#newsTopicRow .ai-pill').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    selectedNewsTopic = e.target.dataset.topic;
+    document.getElementById('newsCustomTopic').value = '';
+  }
+});
+
+document.getElementById('newsAudienceRow').addEventListener('click', (e) => {
+  if (e.target.classList.contains('ai-pill')) {
+    document.querySelectorAll('#newsAudienceRow .ai-pill').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    selectedNewsAudience = e.target.dataset.audience;
+  }
+});
+
+function fetchNewsScript() {
+  const customTopic = document.getElementById('newsCustomTopic').value.trim();
+  const topic = customTopic || selectedNewsTopic;
+  closeNewsModal();
+  generateNewsScript(topic);
+}
+
+async function generateNewsScript(topic) {
+  lastNewsTopic = topic;
+  const result = document.getElementById('newsResult');
+
+  // Show loading state
+  result.classList.add('show');
+  document.getElementById('newsHeadline').textContent = 'Searching for a recent story…';
+  document.getElementById('newsSource').textContent = '';
+  document.getElementById('newsBullets').innerHTML = '<li style="color:var(--muted); font-style:italic;">Finding the latest, summarizing, and writing your script…</li>';
+  document.getElementById('newsPromptText').textContent = '';
+  document.getElementById('newsScript').innerHTML = '';
+  document.getElementById('newsSources').innerHTML = '';
+  document.getElementById('newsSourcesSection').classList.remove('show');
+  result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  const userPrompt = `Use web search to find ONE recent (within the last 60 days) news story about: ${topic}.
+
+CRITICAL — SOURCE REQUIREMENT: The story MUST come from one of these trusted publications. Do NOT use any other source:
+- KFF Health News (kffhealthnews.org)
+- Health Affairs (healthaffairs.org)
+- Fierce Healthcare (fiercehealthcare.com)
+- Modern Healthcare (modernhealthcare.com)
+- STAT News (statnews.com)
+- Reuters (reuters.com)
+- Axios (axios.com)
+- The Wall Street Journal (wsj.com)
+- Bloomberg (bloomberg.com)
+- The American Academy of Actuaries (actuary.org)
+- Society of Actuaries (soa.org)
+- CMS (cms.gov)
+- Peterson-KFF Health System Tracker (healthsystemtracker.org)
+
+When searching, include the publication name in your query (e.g. "KFF Health News ACA premiums 2026") and prefer results from these domains. If your first search doesn't surface a story from these sources, search again with different terms. Do not fall back to other publications, blog posts, vendor marketing, or aggregator sites.
+
+The story should be substantive and relevant to a health actuary's professional interests — for example: ACA premium changes, Medicare/Medicaid policy, AI in claims/underwriting, drug pricing, risk adjustment, mergers, regulatory shifts, etc.
+
+Then return ONLY a JSON object in this exact shape — no markdown fences, no preamble, no commentary:
+
+{
+  "headline": "A clear, factual headline summarizing the story (under 12 words)",
+  "source": "Publication name and approximate date, e.g. 'Bloomberg, April 2026'",
+  "bullets": [
+    "First key point in plain English (1 sentence, ~15-20 words)",
+    "Second key point",
+    "Third key point",
+    "Fourth key point",
+    "Fifth key point — include a specific number or stat if possible"
+  ],
+  "prompt": "A 1-2 sentence speaking practice prompt asking the user to explain or take a position on this story to a specific audience: ${selectedNewsAudience}. Should specify a target duration of 60-90 seconds.",
+  "script": "A 60-90 second example spoken script the user can read aloud. Write in conversational spoken English (NOT corporate prose). Use the marker // to indicate natural pauses for breath/emphasis. Wrap 3-5 key phrases in **double asterisks** to mark words that should be emphasized when speaking. Aim for short sentences, varied rhythm, and a clear arc: hook, context, key facts, takeaway.",
+  "sources": [
+    { "title": "Article or page title", "url": "https://full-url-to-source.com/article" },
+    { "title": "Second source title", "url": "https://..." }
+  ]
+}
+
+Include 2-4 real source URLs in the "sources" array — these MUST be actual URLs from your web search results (not invented). The user will use these to verify the story.
+
+The script should sound like a smart, calm person talking — not reading a press release. It should be specific, include real numbers from the story, and feel natural to say out loud.`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        messages: [{ role: 'user', content: userPrompt }],
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+      }),
+    });
+
+    if (!response.ok) throw new Error('API request failed: ' + response.status);
+
+    const data = await response.json();
+
+    // Collect all text blocks (web search returns multiple content blocks)
+    const fullText = data.content
+      .filter(b => b.type === 'text')
+      .map(b => b.text)
+      .join('\n');
+
+    // Extract JSON — find the largest {...} block
+    const jsonMatch = fullText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('No JSON found in response');
+
+    const cleaned = jsonMatch[0].replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(cleaned);
+
+    // Render the result
+    document.getElementById('newsHeadline').textContent = parsed.headline || 'Recent Story';
+    document.getElementById('newsSource').textContent = parsed.source || '';
+
+    const bulletsEl = document.getElementById('newsBullets');
+    bulletsEl.innerHTML = '';
+    (parsed.bullets || []).forEach(b => {
+      const li = document.createElement('li');
+      li.textContent = b;
+      bulletsEl.appendChild(li);
+    });
+
+    document.getElementById('newsPromptText').textContent = parsed.prompt || '';
+
+    // Render script with formatted pauses and emphasis
+    const scriptText = (parsed.script || '')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\/\//g, '<span class="pause">//</span>');
+    document.getElementById('newsScript').innerHTML = scriptText;
+
+    // Collect sources — from model JSON + actual web search citations
+    const sourceMap = new Map();
+
+    // 1. From the model's structured response
+    (parsed.sources || []).forEach(s => {
+      if (s.url && /^https?:\/\//i.test(s.url)) {
+        sourceMap.set(s.url, { url: s.url, title: s.title || s.url });
+      }
+    });
+
+    // 2. From the actual API citations (more reliable)
+    data.content.forEach(block => {
+      // web_search_tool_result blocks contain the actual search results
+      if (block.type === 'web_search_tool_result' && Array.isArray(block.content)) {
+        block.content.forEach(item => {
+          if (item.url) {
+            const existing = sourceMap.get(item.url);
+            sourceMap.set(item.url, {
+              url: item.url,
+              title: item.title || existing?.title || item.url,
+            });
+          }
+        });
+      }
+      // Citations attached to text blocks
+      if (block.type === 'text' && Array.isArray(block.citations)) {
+        block.citations.forEach(cite => {
+          if (cite.url) {
+            sourceMap.set(cite.url, {
+              url: cite.url,
+              title: cite.title || cite.url,
+            });
+          }
+        });
+      }
+    });
+
+    // Render sources
+    const sourcesEl = document.getElementById('newsSources');
+    const sourcesSection = document.getElementById('newsSourcesSection');
+    sourcesEl.innerHTML = '';
+
+    const trustedDomains = {
+      'kffhealthnews.org': 'KFF Health News',
+      'kff.org': 'KFF',
+      'healthsystemtracker.org': 'Peterson-KFF',
+      'healthaffairs.org': 'Health Affairs',
+      'fiercehealthcare.com': 'Fierce Healthcare',
+      'modernhealthcare.com': 'Modern Healthcare',
+      'statnews.com': 'STAT News',
+      'reuters.com': 'Reuters',
+      'axios.com': 'Axios',
+      'wsj.com': 'WSJ',
+      'bloomberg.com': 'Bloomberg',
+      'actuary.org': 'Am. Academy of Actuaries',
+      'soa.org': 'Society of Actuaries',
+      'cms.gov': 'CMS',
+    };
+
+    const allSources = Array.from(sourceMap.values());
+    // Sort: trusted sources first
+    allSources.sort((a, b) => {
+      const aTrusted = isTrusted(a.url, trustedDomains) ? 0 : 1;
+      const bTrusted = isTrusted(b.url, trustedDomains) ? 0 : 1;
+      return aTrusted - bTrusted;
+    });
+
+    const sources = allSources.slice(0, 6);
+    if (sources.length > 0) {
+      sources.forEach(s => {
+        const li = document.createElement('li');
+        let domain = '';
+        try { domain = new URL(s.url).hostname.replace(/^www\./, ''); } catch (e) {}
+        const trustedKey = Object.keys(trustedDomains).find(d => domain === d || domain.endsWith('.' + d));
+        const badge = trustedKey
+          ? `<span class="source-badge trusted" title="Trusted source">✓ ${trustedDomains[trustedKey]}</span>`
+          : `<span class="source-badge untrusted" title="Not in your trusted-source list">⚠ Unverified</span>`;
+        li.innerHTML = `
+          <a href="${s.url}" target="_blank" rel="noopener noreferrer">${s.title}</a>
+          <span class="source-domain">${domain} ${badge}</span>`;
+        sourcesEl.appendChild(li);
+      });
+      sourcesSection.classList.add('show');
+    } else {
+      sourcesSection.classList.remove('show');
+    }
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById('newsHeadline').textContent = 'Couldn\'t generate';
+    document.getElementById('newsSource').textContent = '';
+    document.getElementById('newsBullets').innerHTML = '<li style="color:var(--rust);">Something went wrong. Try again, or pick a different topic.</li>';
+    document.getElementById('newsPromptText').textContent = '';
+    document.getElementById('newsScript').innerHTML = '';
+  }
+}
+
+function closeNewsResult() {
+  document.getElementById('newsResult').classList.remove('show');
+}
+
+function isTrusted(url, trustedDomains) {
+  try {
+    const domain = new URL(url).hostname.replace(/^www\./, '');
+    return Object.keys(trustedDomains).some(d => domain === d || domain.endsWith('.' + d));
+  } catch (e) { return false; }
+}
+
+const tips = [
+  { num: 'Tip 01', text: 'Record & replay. Your phone is the best coach you have. Watch without cringing.' },
+  { num: 'Tip 02', text: 'Pause longer than feels comfortable. Silence signals confidence to your audience.' },
+  { num: 'Tip 03', text: 'Talk to one person at a time with your eyes — 3–5 seconds per person.' },
+  { num: 'Tip 04', text: 'Start with a story, not a title slide or "thank you for having me."' },
+];
+
+function renderTips() {
+  const row = document.getElementById('tipsRow');
+  tips.forEach(t => {
+    const card = document.createElement('div');
+    card.className = 'tip-card';
+    card.innerHTML = `<span class="tip-num">${t.num}</span><p>${t.text}</p>`;
+    row.appendChild(card);
+  });
+}
+
+// ── Habits ──
+const habits = [
+  { name: 'Out-loud practice', desc: '5–10 min speaking on any topic' },
+  { name: 'Record yourself', desc: 'Film a 60-sec clip, watch it back' },
+  { name: 'Eliminate filler words', desc: 'In one real conversation today' },
+  { name: 'Read aloud', desc: 'Any article — focus on rhythm & pace' },
+  { name: 'Power pause', desc: 'Pause intentionally 3× in conversation' },
+];
+
+const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+let habitState = {};
+
+function renderHabits() {
+  const container = document.getElementById('habitTracker');
+  container.innerHTML = '';
+  habits.forEach((habit, hi) => {
+    const row = document.createElement('div');
+    row.className = 'habit-row';
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'habit-name';
+    nameDiv.innerHTML = `<strong>${habit.name}</strong><span>${habit.desc}</span>`;
+    row.appendChild(nameDiv);
+
+    const daysDiv = document.createElement('div');
+    daysDiv.className = 'habit-days';
+    days.forEach((d, di) => {
+      const dot = document.createElement('button');
+      dot.className = 'day-dot' + (habitState[`${hi}-${di}`] ? ' lit' : '');
+      dot.textContent = d;
+      dot.onclick = () => {
+        habitState[`${hi}-${di}`] = !habitState[`${hi}-${di}`];
+        renderHabits();
+        updateProgress();
+      };
+      daysDiv.appendChild(dot);
+    });
+    row.appendChild(daysDiv);
+
+    const streak = Object.keys(habitState).filter(k => k.startsWith(`${hi}-`) && habitState[k]).length;
+    const badge = document.createElement('div');
+    badge.className = 'streak-badge';
+    badge.innerHTML = streak > 0 ? `<strong>${streak}</strong> day${streak !== 1 ? 's' : ''}` : '—';
+    row.appendChild(badge);
+
+    container.appendChild(row);
+  });
+}
+
+// ── Progress ──
+function updateProgress() {
+  const totalChecks = Object.values(checklistData).flat().length; // 14
+  const totalPillars = 5;
+  const totalHabitDots = habits.length * 7;
+
+  const checksDone = getChecklistCount();
+  const habitsDone = Object.values(habitState).filter(Boolean).length;
+  const total = totalPillars + totalChecks + totalHabitDots;
+  const done = pillarsDone + checksDone + habitsDone;
+  const pct = Math.round((done / total) * 100);
+
+  const circumference = 144.5;
+  const offset = circumference - (pct / 100) * circumference;
+  document.getElementById('ringFill').style.strokeDashoffset = offset;
+  document.getElementById('progressLabel').textContent = pct + '% done';
+}
+
+// ── Init ──
+renderChecklist();
+showPrompt();
+renderTips();
+renderHabits();
+updateProgress();
+</script>
+</body>
+</html>
