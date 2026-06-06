@@ -17,20 +17,50 @@ All six steps are due by June 1, 2026. Owner assignments are Jacob/Jonathan (dat
 
 ---
 
-## 2. Project Overview
+## 2. Process Flow
 
-### 2.1 Objective
+The diagram below shows how the six steps relate to each other across the three phases. Steps 1, 2, and 3 can be worked in parallel; Step 4 depends on Step 2; Step 5 converges Steps 3 and 4; and Step 6 is the final join of Steps 1 and 5.
+
+```mermaid
+flowchart TD
+    subgraph P1["📥 Phase 1: Data Ingestion & Summarization"]
+        S1["**Step 1** — Get Actual HCTA Data\nOwner: Jacob / Jonathan\nData thru: Apr-26\nAlt: Summarize from Tre"]
+        S2["**Step 2** — Get Forecast HCTA Data\nOwner: Jacob / Jonathan\nData thru: Dec-25"]
+        S3["**Step 3** — Read Jordan Forecast\nOwner: Jordan\nActuals thru Dec-25 · Forecast Jan-26+"]
+    end
+
+    subgraph P2["⚙️ Phase 2: Data Processing & Modeling"]
+        S4["**Step 4** — Create Forecast HCTA Allocations\nOwner: Andrew\nDerived from Step 2"]
+        S5["**Step 5** — Apply Allocations to Jordan Forecast\nOwner: Andrew\nFull-year 2026 expected view"]
+    end
+
+    subgraph P3["📊 Phase 3: Executive Dashboard"]
+        S6["**Step 6** — Create Actual vs. Expected Display\nOwner: Andrew\nInputs: Steps 1 & 5"]
+    end
+
+    S2 --> S4
+    S4 --> S5
+    S3 --> S5
+    S1 --> S6
+    S5 --> S6
+```
+
+---
+
+## 3. Project Overview
+
+### 3.1 Objective
 
 Produce a reliable, refreshable view that compares actual medical expenses against expected (forecast-derived) amounts at granular dimensions — enabling payer leadership to quickly identify where costs are tracking above or below plan and investigate drivers.
 
-### 2.2 Key Stakeholders
+### 3.2 Key Stakeholders
 
 - **Jacob / Jonathan** — HCTA data owners; responsible for delivering actuals (Step 1) and forecast HCTA data (Step 2).
 - **Jordan** — Financial source-of-truth owner; responsible for the full-year 2026 forecast file (Step 3).
 - **Andrew** — Lead analyst / engineer; owns all Databricks processing (Steps 4 & 5) and the final display (Step 6).
 - **Executive Leadership / Analysts** — end consumers of the A/E dashboard.
 
-### 2.3 High-Level Timeline
+### 3.3 High-Level Timeline
 
 - **Steps 1–3 (Ingestion):** Complete data pulls and reconciliation validation prior to processing.
 - **Steps 4–5 (Processing):** Build allocation model and apply to 2026 forecast; full-year 2026 dataset as output.
@@ -39,7 +69,7 @@ Produce a reliable, refreshable view that compares actual medical expenses again
 
 ---
 
-## 3. Phase 1: Data Ingestion & Summarization
+## 4. Phase 1: Data Ingestion & Summarization
 
 Phase 1 establishes the foundation by ingesting all required source datasets into Databricks and verifying they are consistent before any processing begins.
 
@@ -100,7 +130,7 @@ Phase 1 establishes the foundation by ingesting all required source datasets int
 
 ---
 
-### 3.1 Phase 1 Exit Criteria
+### 4.1 Phase 1 Exit Criteria
 
 - All three datasets are loaded into Databricks Delta tables with correct schemas and date ranges.
 - HCTA actuals vs. Jordan historical reconciliation is documented (differences < acceptable threshold or explained).
@@ -109,7 +139,7 @@ Phase 1 establishes the foundation by ingesting all required source datasets int
 
 ---
 
-## 4. Phase 2: Data Processing & Modeling
+## 5. Phase 2: Data Processing & Modeling
 
 Phase 2 transforms the ingested data into the allocation-adjusted forecast dataset that will power the A/E comparison. All work in this phase is owned by Andrew.
 
@@ -151,7 +181,7 @@ Phase 2 transforms the ingested data into the allocation-adjusted forecast datas
 
 ---
 
-### 4.1 Phase 2 Exit Criteria
+### 5.1 Phase 2 Exit Criteria
 
 - Allocation keys are documented, validated, and approved.
 - `expected_allocated` table covers Jan 2026 through Dec 2026 with no gaps.
@@ -160,7 +190,7 @@ Phase 2 transforms the ingested data into the allocation-adjusted forecast datas
 
 ---
 
-## 5. Phase 3: Executive Dashboard / UI
+## 6. Phase 3: Executive Dashboard / UI
 
 Phase 3 delivers the user-facing Actual vs. Expected display. The interface must allow non-technical executive users to explore the data interactively while also supporting deeper analyst investigation.
 
@@ -174,7 +204,7 @@ Phase 3 delivers the user-facing Actual vs. Expected display. The interface must
 | **Input Datasets** | Step 1 (HCTA actuals) + Step 5 (allocated expected) |
 | **Primary Output** | Interactive A/E dashboard / report for executive and analyst use |
 
-#### 5.1 Core A/E Metrics
+#### 6.1 Core A/E Metrics
 
 - Actual Medical Expense (from Step 1 HCTA actuals)
 - Expected Medical Expense (from Step 5 allocated Jordan forecast)
@@ -182,7 +212,7 @@ Phase 3 delivers the user-facing Actual vs. Expected display. The interface must
 - A/E Ratio: Actual / Expected (%)
 - Members / Member Months (for per-member normalization)
 
-#### 5.2 Filter & Drill Dimensions
+#### 6.2 Filter & Drill Dimensions
 
 The display should support filtering and slicing across at minimum the following dimensions:
 - **Time Period** — month, quarter, year-to-date; comparison to prior period or prior year
@@ -191,7 +221,7 @@ The display should support filtering and slicing across at minimum the following
 - **Geography** — e.g., region, market, state
 - **Claim / Service Category** — e.g., inpatient, outpatient, pharmacy, professional
 
-#### 5.3 Display Requirements
+#### 6.3 Display Requirements
 
 - Executive summary view: high-level A/E by key dimension with variance highlights (favorable / unfavorable color coding).
 - Trend view: actual vs. expected over time (monthly/quarterly) in chart form.
@@ -199,14 +229,14 @@ The display should support filtering and slicing across at minimum the following
 - Export: ability to export filtered views to Excel or CSV for further analysis.
 - Refresh cadence: data should be updatable as new HCTA actuals are received.
 
-#### 5.4 Technology Recommendations
+#### 6.4 Technology Recommendations
 
 Depending on existing payer tooling, the display can be delivered via one of the following approaches:
 - **Databricks SQL Dashboard** — lowest friction if team is already in Databricks; supports filters and basic charts natively.
 - **Power BI / Tableau connected to Databricks** — richer UX, better for executive distribution; recommended if a BI license exists.
 - **Custom web application** — maximum flexibility but higher build cost; appropriate only if existing BI tools are unavailable.
 
-### 5.5 Phase 3 Exit Criteria
+### 6.5 Phase 3 Exit Criteria
 
 - Dashboard displays correct A/E figures that reconcile to source datasets.
 - All required filter dimensions are functional.
@@ -215,7 +245,7 @@ Depending on existing payer tooling, the display can be delivered via one of the
 
 ---
 
-## 6. Step Summary
+## 7. Step Summary
 
 | # | Task | Owner | Data Thru | Source / Alt Source | Notes |
 |---|---|---|---|---|---|
@@ -228,7 +258,7 @@ Depending on existing payer tooling, the display can be delivered via one of the
 
 ---
 
-## 7. Risks & Assumptions
+## 8. Risks & Assumptions
 
 | Risk | Impact | Mitigation |
 |---|---|---|
@@ -250,7 +280,7 @@ Depending on existing payer tooling, the display can be delivered via one of the
 
 ---
 
-## 8. Immediate Next Steps
+## 9. Immediate Next Steps
 
 - Kick off with Jacob/Jonathan to confirm Step 1 and Step 2 data availability and format specifications.
 - Confirm with Jordan that the forecast file covers through December 2026 and identify the delivery mechanism.
