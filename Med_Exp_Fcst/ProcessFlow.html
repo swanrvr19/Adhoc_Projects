@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Actual vs. Expected Medical Expense — Process Flow</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.6.1/mermaid.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 960px;
+      margin: 48px auto;
+      padding: 0 24px;
+      background: #f9f9f9;
+      color: #222;
+    }
+    h1 {
+      font-size: 1.6rem;
+      color: #1F4E79;
+      margin-bottom: 4px;
+    }
+    p.subtitle {
+      color: #555;
+      font-size: 0.95rem;
+      margin-top: 0;
+      margin-bottom: 32px;
+    }
+    .diagram-box {
+      background: #fff;
+      border: 1px solid #dde3ea;
+      border-radius: 8px;
+      padding: 32px 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+    footer {
+      margin-top: 32px;
+      font-size: 0.8rem;
+      color: #aaa;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Actual vs. Expected Medical Expense</h1>
+  <p class="subtitle">Process Flow — Healthcare Payer Analytics</p>
+
+  <div class="diagram-box">
+    <div class="mermaid">
+flowchart TD
+    subgraph P1["📥 Phase 1: Data Ingestion & Summarization"]
+        S1["Step 1 — Get Actual HCTA Data\nOwner: Jacob / Jonathan\nData thru: Apr-26\nAlt: Summarize from Tre"]
+        S2["Step 2 — Get Forecast HCTA Data\nOwner: Jacob / Jonathan\nData thru: Dec-25"]
+        S3["Step 3 — Read Jordan Forecast\nOwner: Jordan\nActuals thru Dec-25 · Forecast Jan-26+"]
+    end
+
+    subgraph P2["⚙️ Phase 2: Data Processing & Modeling"]
+        S4["Step 4 — Create Forecast HCTA Allocations\nOwner: Andrew\nDerived from Step 2"]
+        S5["Step 5 — Apply Allocations to Jordan Forecast\nOwner: Andrew\nFull-year 2026 expected view"]
+    end
+
+    subgraph P3["📊 Phase 3: Executive Dashboard"]
+        S6["Step 6 — Create Actual vs. Expected Display\nOwner: Andrew\nInputs: Steps 1 & 5"]
+    end
+
+    S2 --> S4
+    S4 --> S5
+    S3 --> S5
+    S1 --> S6
+    S5 --> S6
+    </div>
+  </div>
+
+  <footer>Open in any browser — no apps or plugins required.</footer>
+
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: 'default' });
+  </script>
+</body>
+</html>
