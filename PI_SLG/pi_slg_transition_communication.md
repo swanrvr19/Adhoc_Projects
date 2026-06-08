@@ -10,6 +10,8 @@ For most of the team, the expectation is that you will continue supporting this 
 
 That said, I want to emphasize that I expect the team to continue operating largely as it does today during the transition. The goal is to complete the full transition by the end of the year, and we’ll work through the details thoughtfully as we get closer.
 
+I know this update may raise questions about reporting lines, roles, timing, and what this means for each person individually. Some of those details are still being worked through, and I do not want to speculate ahead of the finalized transition plan. What I can say is that the intent is for the work to continue, for the majority of the team supporting it today to move with the work, and for us to communicate clearly as decisions are finalized.
+
 I also want to be clear that I have full confidence in this team and in the importance of the work. PI SLG continues to matter to the organization, and this move is about aligning the work to the right long-term structure. It is not a reflection of the team’s value, performance, or the importance of the work itself.
 
 We’ll continue to communicate as more details are finalized, and I’ll make sure you have clarity along the way.
