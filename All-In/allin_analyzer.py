@@ -13,7 +13,7 @@ Usage:
     python allin_analyzer.py <youtube_url>        # Specific episode by URL
 
 Requirements:
-    pip install anthropic youtube-transcript-api scrapetube
+    pip install anthropic youtube-transcript-api yt-dlp
 
 Environment:
     ANTHROPIC_API_KEY  — your Anthropic API key (required)
@@ -32,9 +32,9 @@ except ImportError:
     sys.exit("Missing dependency: run  pip install anthropic")
 
 try:
-    import scrapetube
+    import yt_dlp
 except ImportError:
-    sys.exit("Missing dependency: run  pip install scrapetube")
+    sys.exit("Missing dependency: run  pip install yt-dlp")
 
 try:
     from youtube_transcript_api import YouTubeTranscriptApi, NoTranscriptFound, TranscriptsDisabled
@@ -42,12 +42,12 @@ except ImportError:
     sys.exit("Missing dependency: run  pip install youtube-transcript-api")
 
 
-CHANNEL_HANDLE = "allinpodcast"
+CHANNEL_HANDLE = "UCESLZhusAkFfsNsApnjF_Cg"  # All-In with Chamath, Jason, Sacks & Friedberg
 DEFAULT_MODEL   = "claude-opus-4-6"
 MAX_TRANSCRIPT_CHARS = 150_000
 
 
-def parse_video_id(arg: str) -> str | None:
+def parse_video_id(arg: str) -> "str | None":
     match = re.search(r"(?:v=|youtu\.be/|embed/)([a-zA-Z0-9_-]{11})", arg)
     if match:
         return match.group(1)
@@ -56,37 +56,79 @@ def parse_video_id(arg: str) -> str | None:
     return None
 
 
-def get_latest_episode() -> tuple[str, str]:
-    print(f"Fetching latest episode from @{CHANNEL_HANDLE} ...")
-    videos = scrapetube.get_channel(channel_url=f"https://www.youtube.com/@{CHANNEL_HANDLE}")
-    video = next(iter(videos))
-    video_id = video["videoId"]
-    title    = video["title"]["runs"][0]["text"]
-    return video_id, title
+def _channel_entries(n: int = 20) -> list:
+    """Fetch the most recent n videos from the channel."""
+    ydl_opts = {
+        "quiet": True,
+        "extract_flat": True,
+        "playlist_items": f"1-{n}",
+    }
+    url = f"https://www.youtube.com/channel/{CHANNEL_HANDLE}/videos"
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info = ydl.extract_info(url, download=False)
+        return info.get("entries", [])
+
+
+def get_latest_episode() -> "tuple[str, str]":
+    print("Fetching latest episode ...")
+    for entry in _channel_entries():
+        title = entry.get("title", "")
+        if any(skip in title.lower() for skip in ["d&d", "dungeons", "trailer", "#shorts"]):
+            continue
+        return entry["id"], title
+    sys.exit("Could not find a podcast episode on the channel.")
+
+
+def get_episode_by_title(search: str) -> "tuple[str, str]":
+    """Find the episode whose title best matches the search string."""
+    print(f"Searching for episode matching: '{search}' ...")
+    entries = _channel_entries(50)
+    search_lower = search.lower()
+
+    # First pass: substring match
+    for entry in entries:
+        title = entry.get("title", "")
+        if any(skip in title.lower() for skip in ["d&d", "dungeons", "trailer", "#shorts"]):
+            continue
+        if search_lower in title.lower():
+            print(f"Found: {title}")
+            return entry["id"], title
+
+    # Second pass: all search words present (order-independent)
+    words = search_lower.split()
+    for entry in entries:
+        title = entry.get("title", "")
+        if any(skip in title.lower() for skip in ["d&d", "dungeons", "trailer", "#shorts"]):
+            continue
+        if all(w in title.lower() for w in words):
+            print(f"Found: {title}")
+            return entry["id"], title
+
+    sys.exit(f"No episode found matching '{search}'. Try different keywords.")
 
 
 def get_video_title(video_id: str) -> str:
+    ydl_opts = {"quiet": True}
+    url = f"https://www.youtube.com/watch?v={video_id}"
     try:
-        videos = scrapetube.get_video(video_id)
-        return videos.get("title", {}).get("runs", [{}])[0].get("text", video_id)
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+            return info.get("title", video_id)
     except Exception:
         return video_id
 
 
 def get_transcript(video_id: str) -> str:
     try:
-        entries = YouTubeTranscriptApi.get_transcript(video_id)
+        api = YouTubeTranscriptApi()
+        fetched = api.fetch(video_id)
+        entries = [{"text": s.text} for s in fetched]
     except TranscriptsDisabled:
         sys.exit(f"Transcripts are disabled for video {video_id}.")
     except NoTranscriptFound:
-        try:
-            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
-            transcript = transcript_list.find_generated_transcript(
-                [t.language_code for t in transcript_list]
-            )
-            entries = transcript.fetch()
-        except Exception as e:
-            sys.exit(f"Could not retrieve transcript for {video_id}: {e}")
+        sys.exit(f"No transcript found for video {video_id}.")
+    except Exception as e:
+        sys.exit(f"Could not retrieve transcript for {video_id}: {e}")
 
     text = " ".join(entry["text"] for entry in entries)
 
@@ -173,11 +215,15 @@ def main() -> None:
     client = anthropic.Anthropic(api_key=api_key)
 
     if len(sys.argv) > 1:
-        video_id = parse_video_id(sys.argv[1])
-        if not video_id:
-            sys.exit(f"Could not parse a YouTube video ID from: {sys.argv[1]!r}")
-        print(f"Using specified video: {video_id}")
-        title = get_video_title(video_id)
+        arg = sys.argv[1]
+        # If it looks like a video ID or URL, use it directly
+        video_id = parse_video_id(arg)
+        if video_id:
+            print(f"Using specified video: {video_id}")
+            title = get_video_title(video_id)
+        else:
+            # Treat the argument as a title search string
+            video_id, title = get_episode_by_title(arg)
     else:
         video_id, title = get_latest_episode()
 
