@@ -1253,11 +1253,11 @@ Return ONLY valid JSON in this exact shape, no markdown fences, no preamble:
 The "text" must be a concrete exercise the speaker can attempt right now alone, not advice or an explanation.`;
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('http://127.0.0.1:8787/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 500,
         messages: [{ role: 'user', content: userPrompt }],
       }),
@@ -1407,11 +1407,11 @@ Include 2-4 real source URLs in the "sources" array — these MUST be actual URL
 The script should sound like a smart, calm person talking — not reading a press release. It should be specific, include real numbers from the story, and feel natural to say out loud.`;
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('http://127.0.0.1:8787/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 2000,
         messages: [{ role: 'user', content: userPrompt }],
         tools: [{ type: 'web_search_20250305', name: 'web_search' }],
