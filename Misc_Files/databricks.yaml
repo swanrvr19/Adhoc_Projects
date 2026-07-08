@@ -1,0 +1,19 @@
+bundle:
+  name: pi-slg-jobs
+
+include:
+  - "**/jobs/*.yml"
+
+artifacts:
+  pi_slg_package:
+    type: whl
+    path: .
+    build: pip wheel . --no-deps --no-build-isolation -w dist
+
+targets:
+  prod:
+    mode: production
+    default: true
+    workspace:
+      host: https://adb-3239959380256842.2.azuredatabricks.net/
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
