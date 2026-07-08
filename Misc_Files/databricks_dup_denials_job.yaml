@@ -1,0 +1,93 @@
+resources:
+  jobs:
+    Dup_Denials_Full:
+      name: Dup Denials - Full
+      permissions:
+        - level: CAN_MANAGE_RUN
+          group_name: AZU_UDLP_ota_payment_int_DataEngineer
+      schedule:
+        quartz_cron_expression: "44 0 22 4 * ?"
+        timezone_id: America/Chicago
+        pause_status: UNPAUSED
+      email_notifications:
+        on_failure:
+          - dan.colestock@optum.com
+        no_alert_for_skipped_runs: true
+      notification_settings:
+        no_alert_for_skipped_runs: true
+      job_clusters:
+        - job_cluster_key: dup_denials_cluster
+          new_cluster:
+            spark_version: 17.3.x-scala2.13
+            node_type_id: Standard_E16d_v4
+            driver_node_type_id: Standard_E16d_v4
+            data_security_mode: SINGLE_USER
+            runtime_engine: PHOTON
+            azure_attributes:
+              first_on_demand: 1
+              availability: ON_DEMAND_AZURE
+              spot_bid_max_price: -1
+            autoscale:
+              min_workers: 2
+              max_workers: 16
+      tasks:
+        - task_key: CIRRUS
+          notebook_task:
+            notebook_path: "../product/cirrus_dup_denials.py"
+            source: WORKSPACE
+          job_cluster_key: dup_denials_cluster
+          min_retry_interval_millis: 900000
+          libraries:
+            - whl: ../../dist/*.whl
+        - task_key: COSMOS
+          notebook_task:
+            notebook_path: "../product/cosmos_dup_denials.py"
+            source: WORKSPACE
+          job_cluster_key: dup_denials_cluster
+          min_retry_interval_millis: 900000
+          libraries:
+            - whl: ../../dist/*.whl
+        - task_key: CSP
+          notebook_task:
+            notebook_path: "../product/csp_dup_denials.py"
+            source: WORKSPACE
+          job_cluster_key: dup_denials_cluster
+          libraries:
+            - whl: ../../dist/*.whl
+        - task_key: UNET
+          notebook_task:
+            notebook_path: "../product/unet_dup_denials.py"
+            source: WORKSPACE
+          job_cluster_key: dup_denials_cluster
+          min_retry_interval_millis: 900000
+          libraries:
+            - whl: ../../dist/*.whl
+        - task_key: Generate_CSVs
+          depends_on:
+            - task_key: CIRRUS
+            - task_key: COSMOS
+            - task_key: CSP
+            - task_key: UNET
+          notebook_task:
+            notebook_path: "../export/generate_csvs.py"
+            source: WORKSPACE
+          job_cluster_key: dup_denials_cluster
+          min_retry_interval_millis: 900000
+          libraries:
+            - whl: ../../dist/*.whl
+      tags:
+        stream: dups
+        managed_by: databricks-bundle
+      queue:
+        enabled: true
+      parameters:
+        - name: min_proc_dt
+          default: ""
+        - name: note
+          default: ""
+        - name: run_type
+          default: full
+        - name: test_name
+          default: ""
+        - name: managed_by
+          default: databricks-bundle
