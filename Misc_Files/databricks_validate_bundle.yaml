@@ -1,0 +1,36 @@
+name: Validate Databricks Bundle
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+    branches:
+      - main
+    paths:
+      - .github/workflows/deploy-jobs.yml
+      - .github/workflows/validate-bundle.yml
+      - databricks.yml
+      - '**/jobs/*.yml'
+
+jobs:
+  validate-bundle:
+    runs-on: uhg-runner
+    permissions:
+      contents: read
+    env:
+      DATABRICKS_AUTH_TYPE: azure-client-secret
+      DATABRICKS_HOST: https://adb-3239959380256842.2.azuredatabricks.net/
+      ARM_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
+      ARM_TENANT_ID: ${{ secrets.DATABRICKS_TENANT_ID }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Databricks CLI
+        uses: databricks/setup-cli@f01853f8d6b12678ab0fab76ffad726c460be1a5 #v1.5.0
+
+      - name: Validate Databricks bundle
+        run: databricks bundle validate -t prod
