@@ -1,0 +1,54 @@
+
+Executive Summary
+I am an accomplished actuarial professional with over a decade of experience in healthcare analytics and actuarial science. My career showcases expertise in valuation modeling, medical expense forecasting, and predictive analytics. I have a strong technical background spanning multiple programming languages and tools, underpinning my ability to drive data driven decision making within the healthcare space. I also have management experience and strong written and verbal communication skills.
+Credentials and Education
+Associate, Society of Actuaries										                   2017
+SOA Predictive Analytics Certificate										    2021
+Gustavus Adolphus College- St. Peter, Minnesota							        2009-2013
+	Major: Bachelor of Arts in Mathematics 		GPA: 4.0
+	Major: Bachelor of Arts in Accounting		GPA: 4.0 
+	Cumulative GPA: 4.0
+Work Experience
+UnitedHealth Group       								                     June 2013 – Present 
+Vice President, Advisory Services								       Aug. 2025 – Present
+Senior Director, Advisory Services            					                                               Jan. 2023 – Aug. 2025
+Director, Actuarial                                                                                                                                                 Aug. 2021 – Jan. 2023
+Manager, Actuarial                                                                                                                                               Jan. 2019 – Aug. 2021 
+Actuarial Senior Consultant                                                                             				    May 2017 – Jan. 2019
+Senior Actuarial Analyst				                                                                                          Feb. 2016 – May 2017
+Actuarial Analyst				                                                                                           Jun. 2013 – Feb. 2016
+
+Lead, Program Valuation Team — Central Independent Savings Authority
+	Led a cross functional program valuation team of actuaries, data engineers, and analysts serving as the enterprise’s independent authority on savings calculations
+	Ensured all Payment Integrity savings were accurate, objective, transparent, and audit ready
+	Operated independently from product teams to provide unbiased validation and governance of savings results
+	Modernized the valuation technology stack by migrating legacy, ad hoc processes to a scalable Databricks based architecture using PySpark
+	Implemented parameterized Databricks notebooks orchestrated via Databricks Workflows, enabling repeatable, scalable, and auditable valuation pipelines
+
+	Conducted independent valuation modeling for large health insurer to assess the medical cost-impact of affordability initiatives
+•	Delivered and communicated modeling assumptions, sensitivity of those assumptions, and model results to key stakeholders
+•	Developed custom data extracts and summaries utilizing detailed claims and operational data to support comprehensive analyses
+•	Applied regression and control-treatment techniques for more robust, comprehensive, and advanced models 
+	Created the team’s quarterly Pharmacy forecasting modeling using predictive analytic techniques
+•	Accurately forecasts costs at the drug level for both utilization and unit cost
+•	Incorporates components such as AWP price, negotiated discounts, and rebates, with granularity down to the drug and daily level
+	Designed and developed a dynamic, flexible actuarial medical expense forecast framework for a payer’s Medicaid book of business
+•	Model enabled market-specific forecasts and executive-level overviews
+	Assessed and analyzed historical medical trend performance for a commercial book of business in order to identify trend drivers in baseline experience and understand leading indicators for future trend performance
+	Developed actuarial forecasting model for medical payment integrity provider, enhancing the accuracy of operational forecasts and deepening the understanding of savings performance trends and opportunities
+	Crafted actuarial pricing models for new product development built around Accountable Care Organizations
+•	Identified cost-efficient providers to build a value-based product around
+•	Presented results to network pricing and management leaders
+	Constructed models to identify and address provider network gaps in current and proposed products 
+•	Implemented Wilcoxon Rank Sum analysis to identify and recommend cost-efficient providers to fill the gaps in care
+	Streamlined production processes to produce market specific analyses around network and provider performance
+	Gained extensive experience in working with large data sets in SAS/SQL and performing complex data mining analyses involved with provider efficiency studies and new product development
+	Constructed stochastic models designed price provider incentive payments designed to change habits around pharmacy drug referrals  
+	Led a cross-functional team of up to six individuals, ranging from entry-level analysts to senior consultants, and collaborated with business development, data analysis, operations, and finance teams 
+Technical Experience
+	Software/Technical Experience – Expert Experience in R, SAS, SQL, VBA, and Microsoft Office (Excel, Word, PPT)
+
+
+
+
+
