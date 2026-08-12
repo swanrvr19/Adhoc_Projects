@@ -1,0 +1,45 @@
+<#
+    azcopy-setup.ps1
+    ----------------
+    Edit the values below, then load it with a LEADING DOT:
+ 
+        . .\azcopy-setup.ps1
+ 
+    The dot matters. It runs the file in your current session so the
+    variables stick around. Without it they disappear immediately.
+ 
+    Then copy:
+ 
+        azcopy copy $Source $Dest --recursive --dry-run    # preview
+        azcopy copy $Source $Dest --recursive              # real
+#>
+ 
+# ----------------------------- EDIT THESE -----------------------------
+ 
+$TenantId       = "00000000-0000-0000-0000-000000000000"
+$ClientId       = "11111111-1111-1111-1111-111111111111"
+ 
+$StorageAccount = "mycompanydata"      # name only, no https:// or .dfs...
+$Container      = "raw"
+$DestFolder     = "landing"            # folder inside the container
+ 
+$Source         = "//fileserver/share/data"   # forward slashes
+ 
+# --------------------------- END OF EDITS -----------------------------
+ 
+ 
+$Dest = "https://$StorageAccount.dfs.core.windows.net/$Container/$DestFolder"
+ 
+$env:AZCOPY_AUTO_LOGIN_TYPE    = "SPN"
+$env:AZCOPY_TENANT_ID          = $TenantId
+$env:AZCOPY_SPA_APPLICATION_ID = $ClientId
+$env:AZCOPY_SPA_CLIENT_SECRET  = Read-Host "Client secret"
+ 
+Write-Host "`nReady." -ForegroundColor Green
+Write-Host "  `$Source = $Source"
+Write-Host "  `$Dest   = $Dest`n"
+Write-Host "Preview:" -ForegroundColor Cyan
+Write-Host '  azcopy copy $Source $Dest --recursive --dry-run' -ForegroundColor Yellow
+Write-Host "Transfer:" -ForegroundColor Cyan
+Write-Host '  azcopy copy $Source $Dest --recursive' -ForegroundColor Yellow
+Write-Host ""
