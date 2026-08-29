@@ -1,0 +1,947 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>html{color-scheme:light dark}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Everyday Git</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;1,400&display=swap">
+<style>
+  :root {
+    --ground: #F4F7F7;
+    --surface: #FFFFFF;
+    --surface-2: #EDF2F2;
+    --ink: #0E1A1D;
+    --ink-2: #55696D;
+    --ink-3: #7E9195;
+    --rule: #DCE5E5;
+    --rule-strong: #C3D1D1;
+    --accent: #0B6E75;
+    --accent-ink: #075158;
+    --accent-soft: #E1EFEF;
+    --warn: #8A5510;
+    --warn-soft: #FAEEDA;
+    --warn-rule: #E7CFA4;
+    --add: #1F6F43;
+    --del: #A33A32;
+    --shadow: 0 1px 2px rgba(14, 26, 29, .05), 0 8px 24px -16px rgba(14, 26, 29, .28);
+
+    --sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --serif: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0B1315;
+      --surface: #121D20;
+      --surface-2: #172528;
+      --ink: #E7EEED;
+      --ink-2: #9BADAF;
+      --ink-3: #74898C;
+      --rule: #223236;
+      --rule-strong: #2E4247;
+      --accent: #55C4CA;
+      --accent-ink: #8AD9DD;
+      --accent-soft: #103034;
+      --warn: #DFAB5B;
+      --warn-soft: #2A2113;
+      --warn-rule: #4A3A1C;
+      --add: #63C98F;
+      --del: #E8837A;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px -18px rgba(0, 0, 0, .9);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #0B1315;
+    --surface: #121D20;
+    --surface-2: #172528;
+    --ink: #E7EEED;
+    --ink-2: #9BADAF;
+    --ink-3: #74898C;
+    --rule: #223236;
+    --rule-strong: #2E4247;
+    --accent: #55C4CA;
+    --accent-ink: #8AD9DD;
+    --accent-soft: #103034;
+    --warn: #DFAB5B;
+    --warn-soft: #2A2113;
+    --warn-rule: #4A3A1C;
+    --add: #63C98F;
+    --del: #E8837A;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px -18px rgba(0, 0, 0, .9);
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { animation: none !important; transition: none !important; }
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead {
+    border-bottom: 1px solid var(--rule);
+    background: var(--surface);
+  }
+
+  .masthead-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 34px 28px 26px;
+    display: grid;
+    gap: 14px;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0;
+  }
+
+  h1 {
+    font-size: clamp(30px, 5vw, 42px);
+    line-height: 1.05;
+    letter-spacing: -.025em;
+    font-weight: 600;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .lede {
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.5;
+    color: var(--ink-2);
+    max-width: 62ch;
+    margin: 0;
+  }
+
+  .lede em { color: var(--ink); font-style: italic; }
+
+  /* ---------- search bar ---------- */
+
+  .toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: color-mix(in srgb, var(--ground) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .toolbar-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 12px 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .search {
+    position: relative;
+    flex: 1 1 auto;
+    max-width: 520px;
+  }
+
+  .search input {
+    width: 100%;
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--rule-strong);
+    border-radius: 7px;
+    padding: 9px 12px 9px 34px;
+  }
+
+  .search input::placeholder { color: var(--ink-3); }
+
+  .search input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-color: transparent;
+  }
+
+  .search svg {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    color: var(--ink-3);
+    pointer-events: none;
+  }
+
+  .slash-hint {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-3);
+    border: 1px solid var(--rule-strong);
+    border-radius: 4px;
+    padding: 2px 6px;
+    flex: 0 0 auto;
+  }
+
+  .count {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-3);
+    margin-left: auto;
+    font-variant-numeric: tabular-nums;
+    flex: 0 0 auto;
+  }
+
+  /* ---------- layout ---------- */
+
+  .shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 32px 28px 96px;
+    display: grid;
+    grid-template-columns: 190px minmax(0, 1fr);
+    gap: 48px;
+    align-items: start;
+  }
+
+  nav.toc {
+    position: sticky;
+    top: 76px;
+    display: grid;
+    gap: 2px;
+  }
+
+  nav.toc .toc-label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding: 0 0 8px 10px;
+  }
+
+  nav.toc a {
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 13.5px;
+    padding: 5px 10px;
+    border-left: 2px solid transparent;
+    border-radius: 0 4px 4px 0;
+  }
+
+  nav.toc a:hover { color: var(--ink); background: var(--surface-2); }
+
+  nav.toc a.active {
+    color: var(--accent-ink);
+    border-left-color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  nav.toc a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  main { display: grid; gap: 40px; min-width: 0; }
+
+  /* ---------- sections ---------- */
+
+  section { scroll-margin-top: 76px; }
+
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--rule-strong);
+    margin-bottom: 4px;
+  }
+
+  .sec-head h2 {
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: -.015em;
+    margin: 0;
+  }
+
+  .sec-head .sec-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-3);
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  .sec-note {
+    font-family: var(--serif);
+    font-size: 15px;
+    color: var(--ink-2);
+    max-width: 66ch;
+    margin: 10px 0 18px;
+  }
+
+  .rows { display: grid; }
+
+  .cmd {
+    display: grid;
+    grid-template-columns: minmax(0, 23rem) minmax(0, 1fr);
+    gap: 6px 22px;
+    align-items: baseline;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .cmd:last-child { border-bottom: none; }
+
+  .cmd-code {
+    font-family: var(--mono);
+    font-size: 13.5px;
+    line-height: 1.45;
+    color: var(--accent-ink);
+    background: none;
+    border: 0;
+    padding: 2px 6px;
+    margin: -2px -6px;
+    border-radius: 5px;
+    text-align: left;
+    cursor: copy;
+    position: relative;
+    word-break: break-word;
+  }
+
+  .cmd-code:hover { background: var(--accent-soft); }
+  .cmd-code:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; }
+
+  .cmd-code .ph { color: var(--ink-3); font-style: italic; }
+
+  .cmd-code[data-copied="1"]::after {
+    content: "copied";
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-left: 8px;
+    vertical-align: 1px;
+  }
+
+  .cmd p {
+    margin: 0;
+    color: var(--ink-2);
+    font-size: 14px;
+  }
+
+  .cmd p b { color: var(--ink); font-weight: 500; }
+
+  .flag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--warn);
+    background: var(--warn-soft);
+    border: 1px solid var(--warn-rule);
+    border-radius: 3px;
+    padding: 1px 5px;
+    margin-right: 7px;
+    vertical-align: 1.5px;
+    white-space: nowrap;
+  }
+
+  /* ---------- pipeline diagram ---------- */
+
+  .pipeline {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 26px 24px 20px;
+    overflow-x: auto;
+  }
+
+  .pipe-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(112px, 1fr));
+    gap: 0 8px;
+    min-width: 560px;
+  }
+
+  .stage {
+    border: 1px solid var(--rule-strong);
+    border-radius: 8px;
+    background: var(--surface-2);
+    padding: 12px 12px 11px;
+    text-align: center;
+  }
+
+  .stage .s-name {
+    font-size: 13.5px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+  }
+
+  .stage .s-sub {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-3);
+    margin-top: 3px;
+  }
+
+  .flow {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(112px, 1fr));
+    gap: 0 8px;
+    padding: 12px 0 2px;
+  }
+
+  .hop {
+    grid-column: span 2;
+    display: grid;
+    justify-items: center;
+    gap: 3px;
+    position: relative;
+    padding: 0 4px;
+  }
+
+  .hop.fwd { grid-column: span 2; }
+
+  .hop-line {
+    width: 100%;
+    height: 1px;
+    background: var(--rule-strong);
+    position: relative;
+  }
+
+  .hop-line::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: -3px;
+    border-left: 6px solid var(--rule-strong);
+    border-top: 3.5px solid transparent;
+    border-bottom: 3.5px solid transparent;
+  }
+
+  .hop-line.back::after {
+    right: auto;
+    left: 0;
+    border-left: 0;
+    border-right: 6px solid var(--rule-strong);
+  }
+
+  .hop code {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--accent-ink);
+    background: var(--accent-soft);
+    border-radius: 4px;
+    padding: 2px 7px;
+    white-space: nowrap;
+  }
+
+  .hop.back code {
+    color: var(--ink-2);
+    background: var(--surface-2);
+    border: 1px solid var(--rule);
+  }
+
+  .pipe-legend {
+    margin: 16px 0 0;
+    font-family: var(--serif);
+    font-size: 14.5px;
+    color: var(--ink-2);
+    max-width: 70ch;
+  }
+
+  /* ---------- recipes ---------- */
+
+  .recipes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(258px, 1fr));
+    gap: 16px;
+  }
+
+  .recipe {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 18px 18px 16px;
+    box-shadow: var(--shadow);
+  }
+
+  .recipe h3 {
+    font-size: 14.5px;
+    font-weight: 600;
+    margin: 0 0 12px;
+    letter-spacing: -.01em;
+  }
+
+  .recipe ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 10px;
+    counter-reset: step;
+  }
+
+  .recipe li {
+    counter-increment: step;
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr);
+    gap: 9px;
+    align-items: start;
+  }
+
+  .recipe li::before {
+    content: counter(step);
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-3);
+    border: 1px solid var(--rule-strong);
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: grid;
+    place-items: center;
+    margin-top: 2px;
+  }
+
+  .recipe code {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--accent-ink);
+    display: block;
+    word-break: break-word;
+  }
+
+  .recipe span {
+    display: block;
+    font-size: 12.5px;
+    color: var(--ink-3);
+    margin-top: 1px;
+  }
+
+  /* ---------- config block ---------- */
+
+  .empty {
+    font-family: var(--serif);
+    color: var(--ink-2);
+    padding: 28px 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  footer {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 28px 56px;
+    color: var(--ink-3);
+    font-size: 12.5px;
+    font-family: var(--mono);
+  }
+
+  footer a { color: var(--accent); }
+
+  @media (max-width: 880px) {
+    .shell { grid-template-columns: minmax(0, 1fr); gap: 26px; padding: 24px 20px 72px; }
+    nav.toc {
+      position: static;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--rule);
+    }
+    nav.toc .toc-label { display: none; }
+    nav.toc a {
+      border-left: 0;
+      border: 1px solid var(--rule-strong);
+      border-radius: 999px;
+      padding: 4px 11px;
+      font-size: 12.5px;
+    }
+    nav.toc a.active { border-color: var(--accent); }
+    .masthead-inner { padding: 26px 20px 22px; }
+    .toolbar-inner { padding: 10px 20px; }
+    .cmd { grid-template-columns: minmax(0, 1fr); gap: 3px; padding: 11px 0; }
+    .slash-hint { display: none; }
+    footer { padding: 0 20px 48px; }
+  }
+</style>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <p class="eyebrow">Reference · git 2.23+</p>
+    <h1>Everyday Git</h1>
+    <p class="lede">The commands that cover almost every day of normal work — getting a repo, moving between branches, seeing what changed, and backing out of mistakes. <em>Click any command to copy it.</em></p>
+  </div>
+</header>
+
+<div class="toolbar">
+  <div class="toolbar-inner">
+    <div class="search">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+        <circle cx="7" cy="7" r="4.5"></circle>
+        <path d="M10.5 10.5 14 14"></path>
+      </svg>
+      <input id="q" type="search" placeholder="filter commands — try &quot;branch&quot; or &quot;undo&quot;" aria-label="Filter commands" autocomplete="off">
+    </div>
+    <span class="slash-hint">/</span>
+    <span class="count" id="count"></span>
+  </div>
+</div>
+
+<div class="shell">
+  <nav class="toc" aria-label="Sections">
+    <span class="toc-label">Sections</span>
+    <a href="#model">Mental model</a>
+    <a href="#repo">Get a repo</a>
+    <a href="#branches">Branches</a>
+    <a href="#loop">The daily loop</a>
+    <a href="#diff">See what changed</a>
+    <a href="#undo">Undo &amp; rescue</a>
+    <a href="#merge">Merge &amp; sync</a>
+    <a href="#config">Setup &amp; aliases</a>
+    <a href="#recipes">Recipes</a>
+  </nav>
+
+  <main>
+    <section id="model">
+      <div class="sec-head">
+        <h2>The mental model</h2>
+        <span class="sec-tag">four places your work can live</span>
+      </div>
+      <p class="sec-note">Nearly every git command moves changes between these four places, or shows you the gap between two of them. Once the picture is clear, the flags stop feeling arbitrary.</p>
+      <div class="pipeline">
+        <div class="pipe-grid">
+          <div class="stage"><div class="s-name">Working tree</div><div class="s-sub">your files</div></div>
+          <div class="stage"><div class="s-name">Staging area</div><div class="s-sub">the index</div></div>
+          <div class="stage"><div class="s-name">Local repo</div><div class="s-sub">.git history</div></div>
+          <div class="stage"><div class="s-name">Remote</div><div class="s-sub">origin</div></div>
+
+          <div class="flow">
+            <div class="hop"><code>git add</code><div class="hop-line"></div></div>
+            <div class="hop"><code>git commit</code><div class="hop-line"></div></div>
+          </div>
+          <div class="flow" style="padding-top:2px">
+            <div class="hop"><div class="hop-line"></div><code>git push</code></div>
+            <div class="hop back"><div class="hop-line back"></div><code>git fetch / git pull</code></div>
+          </div>
+          <div class="flow back" style="padding-top:2px">
+            <div class="hop back"><div class="hop-line back"></div><code>git restore --staged</code></div>
+            <div class="hop back"><div class="hop-line back"></div><code>git reset</code></div>
+          </div>
+        </div>
+        <p class="pipe-legend"><b>Read it as:</b> <code style="font-family:var(--mono);font-size:13px">add</code> stages, <code style="font-family:var(--mono);font-size:13px">commit</code> records, <code style="font-family:var(--mono);font-size:13px">push</code> publishes — and each has a mirror that walks the change back one step. <code style="font-family:var(--mono);font-size:13px">git status</code> tells you which of the four places your current edits are sitting in.</p>
+      </div>
+    </section>
+
+    <section id="repo">
+      <div class="sec-head">
+        <h2>Get a repo</h2>
+        <span class="sec-tag">clone, init, remotes</span>
+      </div>
+      <div class="rows">
+        <div class="cmd"><button class="cmd-code">git clone <span class="ph">&lt;url&gt;</span></button><p>Copy a remote repo and its full history into a new folder here, and set <b>origin</b> to point back at it.</p></div>
+        <div class="cmd"><button class="cmd-code">git clone <span class="ph">&lt;url&gt;</span> <span class="ph">&lt;folder&gt;</span></button><p>Same, but you choose the folder name instead of taking the repo's.</p></div>
+        <div class="cmd"><button class="cmd-code">git clone --depth 1 <span class="ph">&lt;url&gt;</span></button><p>Shallow clone — latest commit only. Fast on huge repos when you just need the code.</p></div>
+        <div class="cmd"><button class="cmd-code">git clone -b <span class="ph">&lt;branch&gt;</span> <span class="ph">&lt;url&gt;</span></button><p>Clone and land directly on a branch other than the default.</p></div>
+        <div class="cmd"><button class="cmd-code">git init</button><p>Turn the folder you're standing in into a new repo. Nothing is tracked until you <b>add</b> and <b>commit</b>.</p></div>
+        <div class="cmd"><button class="cmd-code">git remote -v</button><p>Show which remotes this repo fetches from and pushes to. First thing to check when a push goes somewhere unexpected.</p></div>
+        <div class="cmd"><button class="cmd-code">git remote add origin <span class="ph">&lt;url&gt;</span></button><p>Point a local-only repo at a remote for the first time.</p></div>
+        <div class="cmd"><button class="cmd-code">git remote set-url origin <span class="ph">&lt;url&gt;</span></button><p>Repoint an existing remote — the usual fix when switching HTTPS to SSH.</p></div>
+      </div>
+    </section>
+
+    <section id="branches">
+      <div class="sec-head">
+        <h2>Branches</h2>
+        <span class="sec-tag">list, switch, create, clean up</span>
+      </div>
+      <p class="sec-note">A branch is just a movable label on a commit. Creating and deleting them is cheap; the only thing that ever gets lost is uncommitted work.</p>
+      <div class="rows">
+        <div class="cmd"><button class="cmd-code">git branch</button><p>List local branches. The one you're on is marked with <b>*</b>.</p></div>
+        <div class="cmd"><button class="cmd-code">git branch -v</button><p>Every branch with its <b>latest commit</b> — short SHA and subject line. The quickest "where is everything at?".</p></div>
+        <div class="cmd"><button class="cmd-code">git branch -vv</button><p>Same, plus the remote branch each one tracks and whether you're <b>ahead</b> or <b>behind</b> it.</p></div>
+        <div class="cmd"><button class="cmd-code">git branch -a -v</button><p>Include remote-tracking branches, so you see branches teammates have pushed but you've never checked out.</p></div>
+        <div class="cmd"><button class="cmd-code">git branch -v --sort=-committerdate</button><p>Newest activity first. Best single command for "what was I working on last week?".</p></div>
+        <div class="cmd"><button class="cmd-code">git branch --merged main</button><p>Branches already folded into main — i.e. the ones that are safe to delete.</p></div>
+        <div class="cmd"><button class="cmd-code">git switch <span class="ph">&lt;branch&gt;</span></button><p>Move to an existing branch. Your uncommitted edits come along if they don't conflict.</p></div>
+        <div class="cmd"><button class="cmd-code">git switch -c <span class="ph">&lt;branch&gt;</span></button><p>Create a branch from where you are and switch to it in one step.</p></div>
+        <div class="cmd"><button class="cmd-code">git switch -c <span class="ph">&lt;branch&gt;</span> origin/<span class="ph">&lt;branch&gt;</span></button><p>Start a local copy of a teammate's remote branch, tracking it.</p></div>
+        <div class="cmd"><button class="cmd-code">git switch -</button><p>Jump back to the branch you were on a moment ago. Toggles like <b>cd -</b>.</p></div>
+        <div class="cmd"><button class="cmd-code">git checkout <span class="ph">&lt;branch&gt;</span></button><p>The older, overloaded command that does what <b>switch</b> does. Still everywhere in docs and muscle memory.</p></div>
+        <div class="cmd"><button class="cmd-code">git branch -m <span class="ph">&lt;new-name&gt;</span></button><p>Rename the branch you're on.</p></div>
+        <div class="cmd"><button class="cmd-code">git branch -d <span class="ph">&lt;branch&gt;</span></button><p>Delete a branch, but only if it's already merged. Refuses otherwise, which is the point.</p></div>
+        <div class="cmd"><button class="cmd-code">git branch -D <span class="ph">&lt;branch&gt;</span></button><p><span class="flag">careful</span>Force-delete regardless of merge state. Commits are recoverable via <b>reflog</b> for a while.</p></div>
+        <div class="cmd"><button class="cmd-code">git push origin --delete <span class="ph">&lt;branch&gt;</span></button><p><span class="flag">careful</span>Delete the branch on the server too. Affects everyone.</p></div>
+        <div class="cmd"><button class="cmd-code">git fetch --prune</button><p>Refresh the remote branch list and drop the stale ones that were deleted on the server.</p></div>
+      </div>
+    </section>
+
+    <section id="loop">
+      <div class="sec-head">
+        <h2>The daily loop</h2>
+        <span class="sec-tag">status, add, commit, push</span>
+      </div>
+      <div class="rows">
+        <div class="cmd"><button class="cmd-code">git status</button><p>What's changed, what's staged, what branch you're on, and how it compares to the remote. Run it constantly.</p></div>
+        <div class="cmd"><button class="cmd-code">git status -sb</button><p>Short form: one terse line per file plus a branch header. Nice when you already know the shape of things.</p></div>
+        <div class="cmd"><button class="cmd-code">git add <span class="ph">&lt;file&gt;</span></button><p>Stage one file — mark it to be included in the next commit.</p></div>
+        <div class="cmd"><button class="cmd-code">git add -A</button><p>Stage everything: new, modified, and deleted files across the whole repo.</p></div>
+        <div class="cmd"><button class="cmd-code">git add -p</button><p>Walk the changes hunk by hunk and choose what to stage. Doubles as a review of your own work.</p></div>
+        <div class="cmd"><button class="cmd-code">git commit -m "<span class="ph">message</span>"</button><p>Record everything currently staged as a commit on the current branch.</p></div>
+        <div class="cmd"><button class="cmd-code">git commit -am "<span class="ph">message</span>"</button><p>Stage all <b>tracked</b> modified files and commit in one step. Skips files git has never seen.</p></div>
+        <div class="cmd"><button class="cmd-code">git commit --amend</button><p><span class="flag">careful</span>Fold staged changes into the last commit, or just fix its message. Rewrites that commit — fine locally, awkward once pushed.</p></div>
+        <div class="cmd"><button class="cmd-code">git push</button><p>Send your commits to the branch's upstream on the remote.</p></div>
+        <div class="cmd"><button class="cmd-code">git push -u origin <span class="ph">&lt;branch&gt;</span></button><p>First push of a new branch — creates it on the remote and remembers the pairing, so later a bare <b>push</b> works.</p></div>
+        <div class="cmd"><button class="cmd-code">git fetch</button><p>Download what's new on the remote without touching your files. Safe any time.</p></div>
+        <div class="cmd"><button class="cmd-code">git pull</button><p>Fetch, then merge the upstream branch into yours. May create a merge commit.</p></div>
+        <div class="cmd"><button class="cmd-code">git pull --rebase</button><p>Fetch, then replay your local commits on top of the updated branch. Keeps history linear.</p></div>
+      </div>
+    </section>
+
+    <section id="diff">
+      <div class="sec-head">
+        <h2>See what changed</h2>
+        <span class="sec-tag">diff, log, show, blame</span>
+      </div>
+      <p class="sec-note">A diff always compares two points. Most of the flags below are just different answers to "compared to <em>what</em>?" — the working tree, the staging area, the last commit, or another branch.</p>
+      <div class="rows">
+        <div class="cmd"><button class="cmd-code">git diff</button><p>Your unstaged edits — working tree vs. what's staged.</p></div>
+        <div class="cmd"><button class="cmd-code">git diff --staged</button><p>What's staged — i.e. exactly what the next commit would contain. Read this before every commit.</p></div>
+        <div class="cmd"><button class="cmd-code">git diff HEAD</button><p>Everything you've changed since the last commit, staged or not.</p></div>
+        <div class="cmd"><button class="cmd-code">git diff --stat</button><p>Summary instead of contents: files touched, lines added and removed.</p></div>
+        <div class="cmd"><button class="cmd-code">git diff -- <span class="ph">&lt;path&gt;</span></button><p>Limit any diff to one file or folder.</p></div>
+        <div class="cmd"><button class="cmd-code">git diff main</button><p>Your branch compared to main as it stands locally right now.</p></div>
+        <div class="cmd"><button class="cmd-code">git diff main...HEAD</button><p>Three dots: only <b>your branch's own changes</b> since it split off main, ignoring what moved on main meanwhile. This is what a pull request shows.</p></div>
+        <div class="cmd"><button class="cmd-code">git diff <span class="ph">&lt;sha1&gt;</span> <span class="ph">&lt;sha2&gt;</span></button><p>Compare any two commits directly.</p></div>
+        <div class="cmd"><button class="cmd-code">git diff --word-diff</button><p>Highlight changed words rather than whole lines. Much easier on prose and long text lines.</p></div>
+        <div class="cmd"><button class="cmd-code">git show <span class="ph">&lt;sha&gt;</span></button><p>One commit in full: message, metadata, and its complete diff.</p></div>
+        <div class="cmd"><button class="cmd-code">git log --oneline -20</button><p>The last twenty commits, one line each.</p></div>
+        <div class="cmd"><button class="cmd-code">git log --oneline --graph --decorate --all</button><p>The branch structure drawn as an ASCII graph, with branch and tag labels. The best "how do these branches relate?" view.</p></div>
+        <div class="cmd"><button class="cmd-code">git log -p -- <span class="ph">&lt;file&gt;</span></button><p>The history of one file with the diff at each step.</p></div>
+        <div class="cmd"><button class="cmd-code">git log --since="2 weeks ago" --author="<span class="ph">name</span>"</button><p>Slice history by time and author. Both filters work on their own too.</p></div>
+        <div class="cmd"><button class="cmd-code">git log <span class="ph">&lt;branch&gt;</span> --not main</button><p>Commits on a branch that main doesn't have yet.</p></div>
+        <div class="cmd"><button class="cmd-code">git blame <span class="ph">&lt;file&gt;</span></button><p>Who last touched each line, in which commit and when. Pair with <b>show</b> to read the reasoning.</p></div>
+        <div class="cmd"><button class="cmd-code">git shortlog -sn</button><p>Commit counts per author — a fast read on who has been in a codebase.</p></div>
+      </div>
+    </section>
+
+    <section id="undo">
+      <div class="sec-head">
+        <h2>Undo &amp; rescue</h2>
+        <span class="sec-tag">restore, reset, revert, stash, reflog</span>
+      </div>
+      <p class="sec-note">Committed work is nearly impossible to lose — <em>reflog</em> remembers every position HEAD has held. Uncommitted work is the fragile kind, so commit or stash before reaching for anything below.</p>
+      <div class="rows">
+        <div class="cmd"><button class="cmd-code">git restore <span class="ph">&lt;file&gt;</span></button><p><span class="flag">careful</span>Throw away unstaged edits to a file and take back the committed version. Not recoverable.</p></div>
+        <div class="cmd"><button class="cmd-code">git restore --staged <span class="ph">&lt;file&gt;</span></button><p>Unstage it but keep the edit — the opposite of <b>add</b>.</p></div>
+        <div class="cmd"><button class="cmd-code">git restore --source=<span class="ph">&lt;sha&gt;</span> <span class="ph">&lt;file&gt;</span></button><p>Bring one file back as it looked at some commit, without disturbing anything else.</p></div>
+        <div class="cmd"><button class="cmd-code">git reset --soft HEAD~1</button><p>Undo the last commit, leaving all its changes staged. The standard "wrong message / too early" fix.</p></div>
+        <div class="cmd"><button class="cmd-code">git reset HEAD~1</button><p>Undo the last commit and drop the changes back to unstaged edits.</p></div>
+        <div class="cmd"><button class="cmd-code">git reset --hard HEAD~1</button><p><span class="flag">careful</span>Undo the last commit <b>and</b> erase its changes from your files.</p></div>
+        <div class="cmd"><button class="cmd-code">git revert <span class="ph">&lt;sha&gt;</span></button><p>Add a new commit that undoes an old one. The safe undo for anything already pushed — nothing is rewritten.</p></div>
+        <div class="cmd"><button class="cmd-code">git stash</button><p>Shelve your uncommitted changes and return to a clean tree.</p></div>
+        <div class="cmd"><button class="cmd-code">git stash -u</button><p>Same, including untracked files — otherwise they're left behind and it's confusing later.</p></div>
+        <div class="cmd"><button class="cmd-code">git stash pop</button><p>Reapply the most recent stash and remove it from the stack.</p></div>
+        <div class="cmd"><button class="cmd-code">git stash list</button><p>Everything you've shelved. Apply a specific one with <b>git stash pop stash@{2}</b>.</p></div>
+        <div class="cmd"><button class="cmd-code">git clean -nd</button><p>Dry run: list untracked files and folders that a clean would delete. Always run this first.</p></div>
+        <div class="cmd"><button class="cmd-code">git clean -fd</button><p><span class="flag">careful</span>Actually delete those untracked files. Git has never seen them, so there's nothing to recover.</p></div>
+        <div class="cmd"><button class="cmd-code">git reflog</button><p>Every position HEAD has held, including ones no branch points at any more. Where you look when commits seem to have vanished.</p></div>
+        <div class="cmd"><button class="cmd-code">git reset --hard <span class="ph">&lt;sha-from-reflog&gt;</span></button><p><span class="flag">careful</span>Put the branch back exactly where it was before the mistake.</p></div>
+        <div class="cmd"><button class="cmd-code">git push --force-with-lease</button><p><span class="flag">careful</span>Force-push, but refuse if someone else pushed since your last fetch. Always prefer this over <b>--force</b>.</p></div>
+      </div>
+    </section>
+
+    <section id="merge">
+      <div class="sec-head">
+        <h2>Merge &amp; sync</h2>
+        <span class="sec-tag">merge, rebase, cherry-pick</span>
+      </div>
+      <div class="rows">
+        <div class="cmd"><button class="cmd-code">git merge <span class="ph">&lt;branch&gt;</span></button><p>Bring another branch's commits into the one you're on, creating a merge commit if the histories diverged.</p></div>
+        <div class="cmd"><button class="cmd-code">git merge --abort</button><p>Back out of a merge that hit conflicts and return to where you started. No harm done.</p></div>
+        <div class="cmd"><button class="cmd-code">git rebase main</button><p>Replay your branch's commits on top of the latest main. Linear history, but it rewrites your commits — don't do it to a branch others are building on.</p></div>
+        <div class="cmd"><button class="cmd-code">git rebase --continue</button><p>Resume a rebase after you've fixed a conflicted step and staged the result.</p></div>
+        <div class="cmd"><button class="cmd-code">git rebase --abort</button><p>Give up on a rebase and put the branch back the way it was.</p></div>
+        <div class="cmd"><button class="cmd-code">git cherry-pick <span class="ph">&lt;sha&gt;</span></button><p>Copy one commit from another branch onto this one. Good for a hotfix that has to land in two places.</p></div>
+        <div class="cmd"><button class="cmd-code">git diff --name-only --diff-filter=U</button><p>List just the files currently in conflict, when the merge output has scrolled past.</p></div>
+      </div>
+    </section>
+
+    <section id="config">
+      <div class="sec-head">
+        <h2>Setup &amp; aliases</h2>
+        <span class="sec-tag">one-time settings worth having</span>
+      </div>
+      <div class="rows">
+        <div class="cmd"><button class="cmd-code">git config --global user.name "<span class="ph">Your Name</span>"</button><p>The name attached to every commit you make.</p></div>
+        <div class="cmd"><button class="cmd-code">git config --global user.email "<span class="ph">you@example.com</span>"</button><p>Must match your host account, or commits won't be linked to you.</p></div>
+        <div class="cmd"><button class="cmd-code">git config --global init.defaultBranch main</button><p>Name the first branch <b>main</b> in every new repo.</p></div>
+        <div class="cmd"><button class="cmd-code">git config --global pull.rebase true</button><p>Make plain <b>git pull</b> rebase instead of merging, so you stop accumulating "Merge branch main" commits.</p></div>
+        <div class="cmd"><button class="cmd-code">git config --list --show-origin</button><p>Every setting in effect and which file it came from. The way to settle "why is git doing that?".</p></div>
+        <div class="cmd"><button class="cmd-code">git config --global alias.lg "log --oneline --graph --decorate -20"</button><p>Now <b>git lg</b> gives you the graph view. Aliases are the cheapest quality-of-life win in git.</p></div>
+        <div class="cmd"><button class="cmd-code">git config --global alias.br "branch -v --sort=-committerdate"</button><p><b>git br</b> — branches by most recent activity, with their latest commits.</p></div>
+        <div class="cmd"><button class="cmd-code">git config --global alias.st "status -sb"</button><p><b>git st</b>, because you'll type it a hundred times a day.</p></div>
+      </div>
+    </section>
+
+    <section id="recipes">
+      <div class="sec-head">
+        <h2>Recipes</h2>
+        <span class="sec-tag">the sequences, not the single commands</span>
+      </div>
+      <div class="recipes">
+        <div class="recipe">
+          <h3>Start something new</h3>
+          <ol>
+            <li><code>git switch main</code><span>Start from the shared branch.</span></li>
+            <li><code>git pull</code><span>Make sure it's current.</span></li>
+            <li><code>git switch -c feature/thing</code><span>Branch off it.</span></li>
+            <li><code>git push -u origin feature/thing</code><span>Publish it and set upstream.</span></li>
+          </ol>
+        </div>
+        <div class="recipe">
+          <h3>Resolve a merge conflict</h3>
+          <ol>
+            <li><code>git status</code><span>See which files conflict.</span></li>
+            <li><span>Edit each one; delete the &lt;&lt;&lt;&lt;&lt;&lt;&lt; markers.</span></li>
+            <li><code>git add &lt;file&gt;</code><span>Staging is how you say "resolved".</span></li>
+            <li><code>git commit</code><span>Or <b>git rebase --continue</b> mid-rebase.</span></li>
+          </ol>
+        </div>
+        <div class="recipe">
+          <h3>Committed on main by mistake</h3>
+          <ol>
+            <li><code>git switch -c feature/thing</code><span>The commit comes with you.</span></li>
+            <li><code>git switch main</code></li>
+            <li><code>git reset --hard origin/main</code><span>Put main back where the remote has it.</span></li>
+            <li><code>git switch feature/thing</code><span>Carry on where you left off.</span></li>
+          </ol>
+        </div>
+        <div class="recipe">
+          <h3>Update a long-lived branch</h3>
+          <ol>
+            <li><code>git fetch origin</code><span>Get the latest refs.</span></li>
+            <li><code>git rebase origin/main</code><span>Or <b>merge</b> if others share the branch.</span></li>
+            <li><span>Resolve conflicts, then <b>git rebase --continue</b>.</span></li>
+            <li><code>git push --force-with-lease</code><span>Needed after a rebase, and only this variant.</span></li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <p class="empty" id="empty" hidden>No commands match that filter.</p>
+  </main>
+</div>
+
+<footer>
+  git switch / git restore need git 2.23 or newer · check yours with <code>git --version</code>
+</footer>
+
+<script>
+  (function () {
+    var input = document.getElementById('q');
+    var countEl = document.getElementById('count');
+    var emptyEl = document.getElementById('empty');
+    var rows = Array.prototype.slice.call(document.querySelectorAll('.cmd'));
+    var sections = Array.prototype.slice.call(document.querySelectorAll('main section'));
+    var total = rows.length;
+
+    rows.forEach(function (r) {
+      r.dataset.k = r.textContent.toLowerCase().replace(/\s+/g, ' ');
+    });
+
+    function setCount(n) {
+      countEl.textContent = n === total ? total + ' commands' : n + ' of ' + total;
+    }
+    setCount(total);
+
+    function filter() {
+      var q = input.value.trim().toLowerCase();
+      var shown = 0;
+      rows.forEach(function (r) {
+        var hit = !q || r.dataset.k.indexOf(q) !== -1;
+        r.hidden = !hit;
+        if (hit) shown++;
+      });
+      sections.forEach(function (s) {
+        var kids = s.querySelectorAll('.cmd');
+        if (!kids.length) {
+          s.hidden = !!q;
+          return;
+        }
+        var any = Array.prototype.some.call(kids, function (k) { return !k.hidden; });
+        s.hidden = !any;
+      });
+      emptyEl.hidden = shown !== 0;
+      setCount(shown);
+    }
+
+    input.addEventListener('input', filter);
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { input.value = ''; filter(); }
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === '/' && document.activeElement !== input) {
+        e.preventDefault();
+        input.focus();
+        input.select();
+      }
+    });
+
+    // click-to-copy
+    document.addEventListener('click', function (e) {
+      var btn = e.target.closest ? e.target.closest('.cmd-code') : null;
+      if (!btn) return;
+      var text = btn.textContent.trim();
+      var done = function () {
+        btn.dataset.copied = '1';
+        setTimeout(function () { delete btn.dataset.copied; }, 1300);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () {});
+      }
+    });
+
+    // active section in the sidebar
+    var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+    var byId = {};
+    links.forEach(function (a) { byId[a.getAttribute('href').slice(1)] = a; });
+
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) {
+            links.forEach(function (a) { a.classList.remove('active'); });
+            var a = byId[en.target.id];
+            if (a) a.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-70px 0px -70% 0px', threshold: 0 });
+      sections.forEach(function (s) { io.observe(s); });
+    }
+  })();
+</script>
+</body>
+</html>
