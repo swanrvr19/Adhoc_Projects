@@ -14,11 +14,16 @@ Running checklist. Add new items to the bottom of **Open**. Check the box and mo
   - [ ] Compare the new forecasts against the existing forecasts
   - [ ] Establish a best practice guide for git branching, committing, etc.
   - [ ] Ask Claude what unit tests need to be done
+  - [ ] Add tree data to the RA Analytic Catalog
 
 - [ ] **Lay out the business case for Judah** — Cover three projects:
   - [ ] The forecast
   - [ ] Member mix
   - [ ] A leading indicator report to identify emerging experience
+
+- [ ] **Figure out what Joe, Matt, and Wooddarsky should be working on** — Decide where each of them is best pointed and get them assigned.
+
+- [ ] **Sweep up the historical forecasts and load them into Databricks** — Gather the historical forecasts and get them loaded into our Databricks environment.
 
 ## Done
 
