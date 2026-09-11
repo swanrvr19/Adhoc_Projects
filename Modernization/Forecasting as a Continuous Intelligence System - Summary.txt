@@ -1,0 +1,19 @@
+FORECASTING AS A CONTINUOUS INTELLIGENCE SYSTEM
+Five Key Takeaways
+
+1. Forecasting should evolve from a periodic exercise into a continuous capability.
+Rather than producing a number on a fixed cadence, the system should run continuously, detect meaningful change earlier, and shorten the distance between a change occurring, being understood, and being acted on.
+
+2. One system, two purposes, with different levels of formalization.
+The same underlying forecast system should serve (1) enterprise decisions — controlled, reviewed, official forecasts for pricing, bids, budgets, accounting, and regulatory needs — and (2) signals intelligence — continuous sensing that flags emerging change. A continuously updated estimate is not automatically an official forecast; canonical forecasts still require professional review, reconciliation, and formal signoff.
+
+3. AI agents generate hypotheses; professionals still make the judgment calls.
+Automated analytical agents (clinical, actuarial, financial, data-science) can localize where a variance is occurring, assess whether it's signal or noise, judge durability, and propose causes. This gives experts a prioritized, evidence-backed starting point instead of raw unexplained numbers — but the decision authority, uncertainty judgment, and accountability remain human.
+
+4. The goal is to redeploy scarce expertise, not replace it.
+Less professional capacity should go toward assembling data, rebuilding calculations, and manually hunting for variances. More capacity should go toward designing assumptions, challenging machine-generated hypotheses, judging materiality/durability, and translating signals into action — with actuarial and other expert judgment remaining essential, especially around uncertainty and structural change.
+
+5. The system must mature in sequence — recall, then precision, then value/cost optimization — while controls exist from day one.
+Early on, the system should favor broad recall (catching potential signals, tolerating false positives) over premature filtering. Over time it improves precision, prioritization, and routing, and eventually balances review effort and cost against value. Throughout, human accountability, transparency, and controls for official-use forecasts must be present from the start — "recall first" does not mean "controls later."
+
+Bottom line: The ultimate goal isn't faster or more automated forecasts — it's building an organizational capability that detects change, focuses expert attention, enables earlier intervention, and learns from outcomes, shifting the core question from "why are the numbers different?" to "what should we do now?"
