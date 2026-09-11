@@ -13,6 +13,7 @@ Running checklist. Add new items to the bottom of **Open**. Check the box and mo
   - [ ] Build the display layer for the forecast output
   - [ ] Compare the new forecasts against the existing forecasts
   - [ ] Establish a best practice guide for git branching, committing, etc.
+  - [ ] Ask Claude what unit tests need to be done
 
 - [ ] **Lay out the business case for Judah** — Cover three projects:
   - [ ] The forecast
