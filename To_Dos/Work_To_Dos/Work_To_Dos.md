@@ -12,6 +12,12 @@ Running checklist. Add new items to the bottom of **Open**. Check the box and mo
   - [ ] Get Dan implementing Rachel's grouping logic suggestion
   - [ ] Build the display layer for the forecast output
   - [ ] Compare the new forecasts against the existing forecasts
+  - [ ] Establish a best practice guide for git branching, committing, etc.
+
+- [ ] **Lay out the business case for Judah** — Cover three projects:
+  - [ ] The forecast
+  - [ ] Member mix
+  - [ ] A leading indicator report to identify emerging experience
 
 ## Done
 
