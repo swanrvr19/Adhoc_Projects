@@ -6,6 +6,13 @@ Running checklist. Add new items to the bottom of **Open**. Check the box and mo
 
 - [ ] **Gap-assess the ML forecast codebase against the continuous intelligence doc** — Read [Forecasting as a Continuous  Intelligence System.txt](Modernization/Forecasting%20as%20a%20Continuous%20%20Intelligence%20System.txt) alongside the [ML_Forecast/](ML_Forecast/) codebase (pipeline, `run_stage.py`, `signals_units.py`, `SEASONALITY_ADJUSTMENT.py`, LightGBM training). Identify where the code already meets the doc's principles and where it doesn't, then write the gaps up as their own to-do items here.
 
+- [ ] **Set up email filtering rules** — Define rules that route recurring mail out of the inbox automatically (automated reports, build/pipeline notifications, calendar noise, newsletters, distribution lists). Decide what gets a folder vs. what gets archived outright, then implement the rules and confirm nothing important is being swallowed.
+
+- [ ] **Build out the ML forecast** — [ML_Forecast/](ML_Forecast/)
+  - [ ] Get Dan implementing Rachel's grouping logic suggestion
+  - [ ] Build the display layer for the forecast output
+  - [ ] Compare the new forecasts against the existing forecasts
+
 ## Done
 
 <!-- Move completed items here with the date, e.g.:
