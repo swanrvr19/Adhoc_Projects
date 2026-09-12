@@ -23,6 +23,8 @@ Running checklist. Add new items to the bottom of **Open**. Check the box and mo
 
 - [ ] **Sweep up the historical forecasts and load them into Databricks** — Gather the historical forecasts and get them loaded into our Databricks environment.
 
+- [ ] **Summarize how the CI/CD GitHub deploy pipeline works** — Use the Duplicates project as the worked example. Write up how a push/merge triggers the pipeline through to deploy, so it can serve as a reference for setting up or explaining CI/CD on other projects.
+
 ## Done
 
 - [x] 2026-09-11 — Set up email filtering rules
