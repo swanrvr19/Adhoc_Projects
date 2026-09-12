@@ -1,0 +1,81 @@
+# yaml-language-server: $schema=../../tools/bundle_config_schema.json
+resources:
+  jobs:
+    Dup_Denials_Intramonth:
+      name: Dup Denials - Intramonth
+      permissions:
+        - level: CAN_MANAGE_RUN
+          group_name: AZU_UDLP_ota_payment_int_DataEngineer
+      schedule:
+        quartz_cron_expression: "44 0 10 ? * Mon"
+        timezone_id: America/Chicago
+      email_notifications: ${var.dups_email_notifications}
+      notification_settings:
+        no_alert_for_skipped_runs: true
+      job_clusters:
+        - job_cluster_key: cluster
+          new_cluster:
+            spark_version: 17.3.x-scala2.13
+            node_type_id: Standard_E16d_v4
+            driver_node_type_id: Standard_E16d_v4
+            data_security_mode: SINGLE_USER
+            runtime_engine: STANDARD
+            azure_attributes:
+              first_on_demand: 1
+              availability: ON_DEMAND_AZURE
+              spot_bid_max_price: -1
+            num_workers: 2
+      tasks:
+        - task_key: CIRRUS
+          notebook_task:
+            notebook_path: "../product/cirrus_dup_denials.py"
+            source: WORKSPACE
+          job_cluster_key: cluster
+          libraries: ${var.job_libraries}
+        - task_key: COSMOS
+          depends_on:
+            - task_key: CIRRUS
+          notebook_task:
+            notebook_path: "../product/cosmos_dup_denials.py"
+            source: WORKSPACE
+          job_cluster_key: cluster
+          libraries: ${var.job_libraries}
+        - task_key: CSP
+          depends_on:
+            - task_key: COSMOS
+          notebook_task:
+            notebook_path: "../product/csp_dup_denials.py"
+            source: WORKSPACE
+          job_cluster_key: cluster
+          libraries: ${var.job_libraries}
+        - task_key: UNET
+          depends_on:
+            - task_key: CSP
+          notebook_task:
+            notebook_path: "../product/unet_dup_denials.py"
+            source: WORKSPACE
+          job_cluster_key: cluster
+          libraries: ${var.job_libraries}
+        - task_key: Generate_CSVs
+          depends_on:
+            - task_key: UNET
+          notebook_task:
+            notebook_path: "../export/generate_csvs.py"
+            source: WORKSPACE
+          job_cluster_key: cluster
+          libraries: ${var.job_libraries}
+      tags:
+        stream: dups
+      queue:
+        enabled: true
+      parameters:
+        - name: min_proc_dt
+          default: ""
+        - name: note
+          default: ""
+        - name: run_type
+          default: intramonth
+        - name: test_name
+          default: ""
+        - name: deployment_target
+          default: ${bundle.target}
