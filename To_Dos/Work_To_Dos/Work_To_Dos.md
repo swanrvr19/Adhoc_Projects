@@ -25,6 +25,8 @@ Running checklist. Add new items to the bottom of **Open**. Check the box and mo
 
 - [ ] **Summarize how the CI/CD GitHub deploy pipeline works** — Use the Duplicates project as the worked example. Write up how a push/merge triggers the pipeline through to deploy, so it can serve as a reference for setting up or explaining CI/CD on other projects.
 
+- [ ] **Build an agent that assigns to-do tasks to employees** — Scope and build an agent that creates and hands out to-do/task items for the team (source of the task list, how it decides who gets what, where it posts the assignment — e.g. Slack/email/ticket — and how completion gets tracked back).
+
 ## Done
 
 - [x] 2026-09-11 — Set up email filtering rules
